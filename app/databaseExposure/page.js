@@ -239,9 +239,9 @@ export default function DatabaseExposure() {
   <h3 className="text-2xl font-semibold">Insider View<Vi>Góc nhìn người trong cuộc</Vi></h3>
 
     <p className="text-sm text-gray-600 mb-3">
-  You are the procurement head (or the DBA, or a hacker holding a DB dump) the night before bid opening - try to read the bids. The database gives you ciphertext only.
+  Try to read the bids as a DBA or head of procurement - you only get ciphertext.
 </p>
-<p className="text-sm text-gray-600 mb-3">The Decrypt button uses your logged-in Vendor A session: it can open only your own envelopes with a Read role. A DB dump grants no such access, and your financial envelope stays sealed until the committee opens it.</p>
+
 
 <AccordionBox
   title="Why an exposed database is still unreadable"

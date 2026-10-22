@@ -365,10 +365,10 @@ export default function User(){
                   !auth.hasOneRole("_tide_cc.selfencrypt")
                 ) ? (
                   <p className="text-sm text-gray-600 mb-6">
-                    Vendor A currently has no envelope access. The Fabric cannot reveal or accept your bid until the Tender Committee passes a motion granting the required roles.
+                    No envelope access until the committee grants the roles.
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-600 mb-6">You are Vendor A. Submit delivery time in the technical envelope and your price in the financial envelope. Initially, you can read and edit delivery time, but price is write-only: once sealed, nobody can decrypt it, including your own session, until 3 of 5 committee members sign a motion to open the financial envelopes.</p>
+                  <p className="text-sm text-gray-600 mb-6">Vendor A: price is write-only until 3 of 5 members open it.</p>
                 )}
 
                 <form className="space-y-6" onSubmit={handleFormSubmit}>
@@ -384,7 +384,7 @@ export default function User(){
                       return (
                         <div key={i}>
                           <p className="font-medium text-sm">{label}<Vi>{FIELDS[field].vi}</Vi></p>
-                          <span className="inline-block mt-2 rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">Sealed - no access in this session</span>
+                          <span className="inline-block mt-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">🔒 Sealed</span>
                           {showUserInfoAccordion && (
                             <div className="text-xs text-gray-600 mt-2 space-y-2 bg-gray-50 border border-gray-200 rounded p-3">
                               <h5 className="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">
@@ -429,11 +429,11 @@ export default function User(){
                     return (
                       <div key={field}>
                         <label className="block font-medium text-sm mb-1">{label}<Vi>{FIELDS[field].vi}</Vi></label>
-                        <span className="block w-fit mb-2 rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                        <span className="block w-fit mb-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">
                           {canWrite && !canRead
-                            ? "🔒 Sealed on submit - not even you can reopen it until the committee opens the envelopes"
+                            ? "🔒 Sealed until opening"
                             : canRead && !canWrite
-                              ? "Submissions closed - read-only"
+                              ? "Closed · read-only"
                               : "Open for editing"}
                         </span>
                         {canRead && canWrite && (

@@ -54,7 +54,7 @@ function DoneCard({ router }) {
 
   if (!ready) {
     return (
-      <div className="bg-white border rounded-lg p-6 shadow flex items-center gap-3 mt-8">
+      <div className="bg-white border rounded-2xl p-6 shadow flex items-center gap-3 mt-8">
         <div className="spinner--left" />
         <span className="text-sm text-gray-600">Committing the committee motion…</span>
       </div>
@@ -62,7 +62,7 @@ function DoneCard({ router }) {
   }
 
   return (
-    <div className="bg-white border rounded-lg p-6 shadow space-y-4 mt-8">
+    <div className="bg-white border rounded-2xl p-6 shadow space-y-4 mt-8">
       <div className="mt-4">
         <div className="text-sm text-gray-700 flex items-center gap-2">
           <FaCheckCircle className="text-green-500" />
@@ -555,7 +555,7 @@ export default function Admin() {
       };
 
       return (
-        <div className="bg-white border rounded-lg p-6 shadow space-y-4 mt-8">
+        <div className="bg-white border rounded-2xl p-6 shadow space-y-4 mt-8">
 
         <div className="flex justify-between items-center mt-6">
           {ADMIN_NAMES.map((name, idx) => (
@@ -743,7 +743,7 @@ export default function Admin() {
               {!isTideAdmin && (
                 <div className="space-y-4">
                   <h2 className="text-3xl font-bold mb-4">Tender Committee<Vi>Hội đồng thầu</Vi></h2>
-                  <p className="text-sm text-gray-600 mb-6">Any change to the tender rules - close submissions, extend the deadline or open the financial envelopes - is a motion needing 3 of 5 committee signatures. No chair, IT admin or platform operator can push it through alone.</p>
+                  <p className="text-sm text-gray-600 mb-6">Every rule change needs 3 of 5 committee signatures.</p>
                   {!showExplainer ? (
                     <Button className="hover:bg-red-700" onClick={handleElevateClick}>Join the committee (demo)</Button>
                   ) : (
@@ -771,16 +771,16 @@ export default function Admin() {
                 <div className="space-y-6">
                   <h2 className="text-3xl font-bold mb-4">Tender Committee<Vi>Hội đồng thầu</Vi></h2>
                   <p className="text-sm text-gray-700">
-                    Any change to the tender rules - close submissions, extend the deadline or open the financial envelopes - is a motion needing 3 of 5 committee signatures. No chair, IT admin or platform operator can push it through alone.
+                    Every rule change needs 3 of 5 committee signatures.
                   </p>
                   <form
                     onSubmit={handleAdminPermissionSubmit}
                     onChange={() => setHasChanges(true)}
                     className="space-y-6"
                   >
-                    <div className="border rounded-lg p-5 bg-white space-y-6">
+                    <div className="border rounded-2xl p-5 bg-white space-y-6">
                       <h4 className="text-base font-semibold text-gray-800">Motion: Vendor A's envelopes</h4>
-                      <p className="text-sm text-gray-600">Choose a tender motion, then table it for 3 of 5 committee signatures.</p>
+                      <p className="text-sm text-gray-600">Pick a motion, then table it.</p>
 
                       <div className="grid gap-4 sm:grid-cols-3">
                         <button
@@ -795,7 +795,7 @@ export default function Admin() {
                         >
                           <span className="block font-semibold text-gray-800">Close submissions</span>
                           <Vi>Đóng nhận hồ sơ</Vi>
-                          <span className="mt-3 block text-sm text-gray-600">Stop accepting changes to both envelopes.</span>
+                          <span className="mt-3 block text-sm text-gray-600">Freeze both envelopes.</span>
                           {!hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
                         </button>
                         <button
@@ -811,7 +811,7 @@ export default function Admin() {
                         >
                           <span className="block font-semibold text-gray-800">Open financial envelopes</span>
                           <Vi>Mở túi tài chính</Vi>
-                          <span className="mt-3 block text-sm text-gray-600">Open bid prices and close submissions.</span>
+                          <span className="mt-3 block text-sm text-gray-600">Open prices, close bidding.</span>
                           {hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
                         </button>
                         <div className="space-y-3">
@@ -828,10 +828,10 @@ export default function Admin() {
                           >
                             <span className="block font-semibold text-gray-800">Extend deadline for Vendor A</span>
                             <Vi>Gia hạn cho nhà thầu A</Vi>
-                            <span className="mt-3 block text-sm text-gray-600">Let Vendor A update both envelopes again.</span>
+                            <span className="mt-3 block text-sm text-gray-600">Let Vendor A edit again.</span>
                             {hasDobWritePerm && hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
                           </button>
-                          <p id="extend-deadline-note" className="text-xs text-rose-400">The classic bid-rigging favour. It still needs 3 of 5 signatures.</p>
+                          <p id="extend-deadline-note" className="text-xs text-rose-400">Classic favour; still needs 3 of 5.</p>
                         </div>
                       </div>
 
@@ -892,7 +892,7 @@ export default function Admin() {
                       {/* Sub-heading + info toggle */}
                       <div className="relative mb-2">
                         <h3 className="text-xl font-semibold">Motions awaiting signatures<Vi>Đề xuất chờ ký</Vi></h3>
-                        <p className="text-sm text-gray-700">Review the motion as committee member #1. The other four members are simulated; once 3 of 5 signatures are recorded, you can commit the new rules.</p>
+                        <p className="text-sm text-gray-700">Sign as member #1; commit at 3 of 5.</p>
                         <button
                           onClick={() => setShowChangeInfo(prev => !prev)}
                           className="absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"

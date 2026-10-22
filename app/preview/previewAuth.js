@@ -53,10 +53,10 @@ function mintCiphertext() {
 
 // ---- SIMULATED personas + policy engine (stand-in for TideCloak realm roles + Fabric-signed tokens) ----
 export const PERSONAS = {
-  vendor: { id: "vendor", label: "Vendor A · bidder", vi: "Nhà thầu A · bên dự thầu", realmRoles: ["vendor"], blurb: "Seals a price and delivery time under its own key." },
-  procurement: { id: "procurement", label: "Procurement head · committee member #1", vi: "Trưởng phòng mua sắm · thành viên hội đồng #1", realmRoles: ["committee-member", "procurement-head"], blurb: "Tables and signs motions. Holds no envelope roles." },
-  itadmin: { id: "itadmin", label: "IT admin / DBA", vi: "Quản trị IT / DBA", realmRoles: ["it-admin"], blurb: "Full database access, but ciphertext only." },
-  ai: { id: "ai", label: "AI evaluation agent", vi: "Tác tử AI chấm thầu", realmRoles: ["ai-agent"], blurb: "Reads the board; prices only after opening." },
+  vendor: { id: "vendor", label: "Vendor A · bidder", vi: "Nhà thầu A · bên dự thầu", realmRoles: ["vendor"], blurb: "Seals a price and delivery time." },
+  procurement: { id: "procurement", label: "Procurement head · committee member #1", vi: "Trưởng phòng mua sắm · thành viên hội đồng #1", realmRoles: ["committee-member", "procurement-head"], blurb: "Tables and signs motions." },
+  itadmin: { id: "itadmin", label: "IT admin / DBA", vi: "Quản trị IT / DBA", realmRoles: ["it-admin"], blurb: "Sees the database, ciphertext only." },
+  ai: { id: "ai", label: "AI evaluation agent", vi: "Tác tử AI chấm thầu", realmRoles: ["ai-agent"], blurb: "Reads prices only after opening." },
 };
 const COOKIE = "sim_persona";
 function setPersonaCookie(id) {
@@ -364,7 +364,7 @@ function PreviewBanner() {
         }}
       >
         <span style={{ width: 6, height: 6, borderRadius: 999, background: "#fbbf24", flexShrink: 0 }} />
-        <span>Preview mode — simulated locally, not connected to TideCloak · Chế độ xem trước — mô phỏng</span>
+        <span>Simulated TideCloak · Mô phỏng TideCloak</span>
       </div>
       <div style={{ height: BANNER_HEIGHT, flexShrink: 0 }} aria-hidden="true" />
     </>
@@ -571,24 +571,24 @@ export function PreviewLanding() {
   };
   return (
     <main className="flex-grow w-full px-4 py-12">
-      <div className="mx-auto w-full max-w-md space-y-4 rounded-lg border border-[#1f1f1f] bg-[#111] p-5">
+      <div className="mx-auto w-full max-w-md space-y-4 rounded-2xl border border-[#1f1f1f] bg-[#111] p-5 shadow-[0_1px_2px_rgba(0,0,0,.4)]">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold tracking-tight text-neutral-100">Sign in with Tide</h2>
-          <span className="rounded-md border border-[#2e2e2e] px-2 py-0.5 text-xs text-neutral-400">simulated</span>
+          <span className="rounded-full border border-[#2e2e2e] px-2.5 py-0.5 text-xs text-neutral-400">simulated</span>
         </div>
-        <p className="text-xs italic text-neutral-500">Đăng nhập Tide · mô phỏng</p>
+        <p className="text-xs italic text-neutral-500">Đăng nhập bằng Tide</p>
         <p className="text-sm text-neutral-400">
-          The Tide network is not used here. Pick who you are: the app then enforces that persona's roles with simulated policy checks, and every allow/deny is logged on the Tender Board.
+          Pick a persona to continue.
         </p>
         <div className="space-y-2">
           {Object.values(PERSONAS).map((p) => (
-            <button key={p.id} type="button" onClick={() => pick(p.id)} className="block w-full rounded-lg border border-[#1f1f1f] bg-[#0a0a0a] p-3 text-left transition hover:border-[#3a3a3a]">
+            <button key={p.id} type="button" onClick={() => pick(p.id)} className="block w-full rounded-xl border border-[#1f1f1f] bg-[#0a0a0a] p-3 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[#3a3a3a] hover:bg-[#101010] motion-reduce:transform-none">
               <div className="text-sm font-medium text-neutral-100">{p.label}</div>
               <div className="text-xs italic text-neutral-500">{p.vi}</div>
               <div className="mt-1 text-xs text-neutral-400">{p.blurb}</div>
               <div className="mt-2 flex flex-wrap gap-1">
                 {p.realmRoles.map((r) => (
-                  <span key={r} className="rounded bg-[#1a1a1a] px-1.5 py-0.5 font-mono text-[11px] text-neutral-400">{r}</span>
+                  <span key={r} className="rounded-full bg-[#1a1a1a] px-2 py-0.5 font-mono text-[11px] text-neutral-400">{r}</span>
                 ))}
               </div>
             </button>

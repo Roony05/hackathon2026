@@ -170,11 +170,12 @@ export default function TenderBoard() {
     setAiResult({ allow: true, prices: r.prices, reason: r.reason, rule: r.rule, summary });
   };
 
-  const chip = "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium";
+  const chip = "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium";
   const sealedChip = (
     <span className={chip + " border border-[#2e2e2e] bg-[#1a1a1a] text-neutral-300"}>🔒 Sealed</span>
   );
-  const card = "rounded-lg border border-[#1f1f1f] bg-[#111] p-5";
+  const card = "rounded-2xl border border-[#1f1f1f] bg-[#111] p-5 shadow-[0_1px_2px_rgba(0,0,0,.4)]";
+  const liftCard = card + " lift";
 
   return (
     <main className="flex-grow w-full pt-8 pb-16">
@@ -185,37 +186,18 @@ export default function TenderBoard() {
           <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Tender {TENDER.id}</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-100">{TENDER.title}</h1>
           <Vi>{TENDER.titleVi}</Vi>
-          <dl className="mt-5 grid gap-x-8 gap-y-4 border-t border-[#1f1f1f] pt-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <dt className="text-xs text-neutral-500">Buyer</dt>
-              <dd className="mt-0.5 text-neutral-200">{TENDER.buyer}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-neutral-500">Method</dt>
-              <dd className="mt-0.5 text-neutral-200">{TENDER.method}</dd>
-              <Vi>{TENDER.methodVi}</Vi>
-            </div>
-            <div>
-              <dt className="text-xs text-neutral-500">Estimate</dt>
-              <dd className="mt-0.5 tabular-nums text-neutral-200">{formatVND(TENDER.estimateVND)}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-neutral-500">Submission deadline</dt>
-              <dd className="mt-0.5 text-neutral-200">{TENDER.deadline}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-neutral-500">Rule changes need</dt>
-              <dd className="mt-0.5 text-neutral-200">
-                {TENDER.quorum.required} of {TENDER.quorum.total} committee signatures
-              </dd>
-            </div>
-          </dl>
+          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[#1f1f1f] pt-4 text-sm text-neutral-300">
+            <span>{TENDER.buyer}</span><span className="text-neutral-600">·</span>
+            <span className="tabular-nums">{formatVND(TENDER.estimateVND)}</span><span className="text-neutral-600">·</span>
+            <span>{TENDER.deadline}</span><span className="text-neutral-600">·</span>
+            <span>{TENDER.quorum.required} of {TENDER.quorum.total} signatures</span>
+          </p>
         </section>
 
         {/* Phase stepper */}
         <section className={card}>
           <h2 className="text-base font-semibold tracking-tight text-neutral-100">Tender phase</h2>
-          <Vi>Giai đoạn đấu thầu (suy ra từ vai trò thật trong TideCloak)</Vi>
+          <Vi>Giai đoạn đấu thầu</Vi>
           <ol className="mt-5 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, idx) => {
               const active = s.n === phase;
@@ -236,15 +218,15 @@ export default function TenderBoard() {
                       {s.label}
                     </span>
                     <Vi>{s.vi}</Vi>
-                    {active && <p className="mt-1 text-xs font-medium text-neutral-300">Current phase</p>}
+                    
                   </div>
                 </li>
               );
             })}
           </ol>
           <p className="mt-5 border-t border-[#1f1f1f] pt-4 text-xs text-neutral-500">
-            Changing steps requires a committee motion with 3/5 signatures.{" "}
-            <Link href="/admin" className="text-neutral-300 underline underline-offset-2">Tender Committee</Link>
+            Steps change only by 3/5 committee motion.{" "}
+            <Link href="/admin" className="text-neutral-300 underline">Tender Committee</Link>
           </p>
         </section>
 
@@ -266,7 +248,7 @@ export default function TenderBoard() {
                 {ordered.map((r) => {
                   const isLowest = phase === 3 && r.key === lowestKey;
                   return (
-                    <tr key={r.key} className="border-b border-[#1f1f1f] align-top transition-colors hover:bg-[#161616]">
+                    <tr key={r.key} className="border-b border-[#1f1f1f] align-top transition-colors hover:bg-[#141414]">
                       <td className="py-3 pr-4">
                         <div className="font-medium text-neutral-100">{r.v.name}</div>
                         {r.you && <Vi>{r.v.nameVi}</Vi>}
@@ -319,7 +301,7 @@ export default function TenderBoard() {
             </table>
           </div>
           {phase === 3 && (
-            <p className="mt-3 text-xs text-neutral-500">Sorted by price, lowest first. Percentages are relative to the buyer's estimate of {formatVND(estimate)}.</p>
+            <p className="mt-3 text-xs text-neutral-500">Lowest price first, vs buyer estimate.</p>
           )}
         </section>
 
@@ -330,10 +312,10 @@ export default function TenderBoard() {
               <h2 className="text-base font-semibold tracking-tight text-neutral-100">{pv ? "Access log" : "Who tried to break the rules"}</h2>
               <span className={chip + " shrink-0 bg-amber-500/10 text-amber-400"}>{pv ? "live · simulated policy" : "illustrative"}</span>
             </div>
-            <Vi>{pv ? "Nhật ký truy cập (mô phỏng)" : "Ai đã thử phá luật"}</Vi>
+            <Vi>{pv ? "Nhật ký truy cập" : "Ai đã thử phá luật"}</Vi>
             {pv ? (
               <ul className="mt-3 max-h-80 divide-y divide-[#1f1f1f] overflow-y-auto text-xs">
-                {pv.accessLog.length === 0 && <li className="py-2 italic text-neutral-500">No checks yet. Act as a persona and entries appear here.</li>}
+                {pv.accessLog.length === 0 && <li className="py-2 italic text-neutral-500">No checks yet.</li>}
                 {pv.accessLog.map((e, i) => (
                   <li key={i} className="py-2">
                     <span className={chip + " mr-2 " + (e.result === "ALLOW" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400")}>{e.result}</span>
@@ -362,13 +344,10 @@ export default function TenderBoard() {
             <h2 className="text-base font-semibold tracking-tight text-neutral-100">Why this can't be rigged</h2>
             <Vi>Vì sao không thể thông thầu</Vi>
             <ul className="mt-3 space-y-3 text-sm text-neutral-400">
-              <li className="flex gap-2"><FaKey className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Keys no one holds.</strong> The decryption key never exists in one place, so there is nothing for an insider to steal.</span></li>
-              <li className="flex gap-2"><FaUsers className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Rules change only by quorum.</strong> Opening envelopes or closing submissions needs 3 of 5 committee signatures.</span></li>
-              <li className="flex gap-2"><FaMicrochip className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Decryption only at the edge.</strong> A price decrypts in the browser of the role holder, never on the server.</span></li>
+              <li className="flex gap-2"><FaKey className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Keys no one holds</strong></span></li>
+              <li className="flex gap-2"><FaUsers className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Rules change by 3-of-5 quorum</strong></span></li>
+              <li className="flex gap-2"><FaMicrochip className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Decrypts only in your browser</strong></span></li>
             </ul>
-            <p className="mt-4 border-t border-[#1f1f1f] pt-4 text-sm text-neutral-300">
-              With ordinary login and backend permissions, whoever runs the database is the person you have to trust - that is exactly how bid rigging happens.
-            </p>
           </div>
         </div>
 
@@ -378,18 +357,18 @@ export default function TenderBoard() {
               <h2 className="text-base font-semibold tracking-tight text-neutral-100">AI evaluator</h2>
               <span className={chip + " bg-amber-500/10 text-amber-400"}>simulated AI</span>
             </div>
-            <Vi>Tác tử AI chấm thầu (mô phỏng)</Vi>
+            <Vi>Tác tử AI chấm thầu</Vi>
             <button type="button" onClick={requestPrices} className="btn-gold mt-3">Request bid prices</button>
             {aiResult && !aiResult.allow && (
-              <p className="mt-3 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+              <p className="mt-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
                 DENY: {aiResult.reason}. <span className="italic">rule: {aiResult.rule}</span>
               </p>
             )}
             {aiResult && aiResult.allow && (
-              <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+              <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
                 <p className="font-medium">ALLOW: {aiResult.reason}</p>
                 <p className="mt-1 text-neutral-300">{aiResult.summary}</p>
-                <p className="mt-1 text-xs italic text-neutral-500">Generated locally by the simulated AI from the opened prices. No model was called.</p>
+                <p className="mt-1 text-xs italic text-neutral-500">Simulated locally; no model called.</p>
               </div>
             )}
           </section>
@@ -409,7 +388,7 @@ export default function TenderBoard() {
         </div>
 
         <p className="text-xs text-neutral-500">
-          Prototype: Vendor A's envelopes are real TideCloak-encrypted data; competitor bids and committee members 2-5 are simulated.
+          Prototype: only Vendor A's envelopes are real; the rest is simulated.
         </p>
       </div>
     </main>

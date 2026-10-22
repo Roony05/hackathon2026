@@ -85,9 +85,9 @@ export default function Nav() {
       )}
 
       {pv && pv.persona && (
-        <span className="ml-auto mr-2 flex items-center gap-2 rounded-md border border-[#1f1f1f] bg-[#111] px-2.5 py-1 text-xs text-neutral-400">
+        <span className="ml-auto mr-2 flex items-center gap-2 rounded-full border border-[#1f1f1f] bg-[#111] px-3 py-1 text-xs text-neutral-400">
           Signed in (simulated) as <strong className="font-medium text-neutral-100">{pv.personaLabel}</strong>
-          <button type="button" onClick={() => pv.switchPersona()} className="rounded border border-[#2e2e2e] px-1.5 py-0.5 font-medium text-neutral-200 hover:bg-[#1a1a1a]">Switch</button>
+          <button type="button" onClick={() => pv.switchPersona()} className="rounded-full border border-[#2e2e2e] px-2 py-0.5 font-medium text-neutral-200 transition hover:bg-[#1a1a1a]">Switch</button>
         </span>
       )}
 
