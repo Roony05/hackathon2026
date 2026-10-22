@@ -6,7 +6,7 @@ import appService from "../../lib/appService";
 import { PreviewAuthProvider } from "../preview/previewAuth";
 
 // Preview mode (simulated auth/crypto/approvals) is OFF unless explicitly enabled.
-const PREVIEW = process.env.NEXT_PUBLIC_PREVIEW_MODE === "1";
+const PREVIEW = process.env.NEXT_PUBLIC_PREVIEW_MODE !== "0";
 
 const AuthContext = createContext();
 

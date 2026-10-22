@@ -2,7 +2,7 @@
 
 // PREVIEW MODE: a fully simulated auth / crypto / approvals layer so the whole GUI
 // can be clicked through without TideCloak. Enabled only when
-// NEXT_PUBLIC_PREVIEW_MODE === "1" (see app/context/AuthProvider.js).
+// NEXT_PUBLIC_PREVIEW_MODE is not "0" (simulated mode is the default; see app/context/AuthProvider.js).
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";

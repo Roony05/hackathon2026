@@ -16,7 +16,7 @@ import { useAuth } from './context/AuthProvider';
 import appService from '../lib/appService';
 import { PreviewLanding } from './preview/previewAuth';
 
-const PREVIEW = process.env.NEXT_PUBLIC_PREVIEW_MODE === '1';
+const PREVIEW = process.env.NEXT_PUBLIC_PREVIEW_MODE !== '0';
 
 /**
  * Hook: load TideCloak config and track initialization state.

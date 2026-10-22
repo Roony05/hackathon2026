@@ -33,7 +33,7 @@ export default function Nav() {
   const showAdmin = !pv || pv.persona === "procurement";
 
   return (
-    <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE === "1" ? 32 : 0 }} className="sticky z-40 flex h-14 flex-wrap items-center gap-1 border-b border-[#1f1f1f] bg-[#0a0a0a]/80 px-6">
+    <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE !== "0" ? 32 : 0 }} className="sticky z-40 flex h-14 flex-wrap items-center gap-1 border-b border-[#1f1f1f] bg-[#0a0a0a]/80 px-6">
       {/* Logo → home page */}
       <Link href="/home" className="mr-4 inline-flex items-center gap-2">
         <FaLock className="h-3.5 w-3.5 text-neutral-100" />

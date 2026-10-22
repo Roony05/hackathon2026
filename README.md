@@ -25,9 +25,9 @@ Vendor A seals a price nobody can reopen, not even Vendor A. The Insider View sh
 
 [demo.mp4](./demo.mp4) — 2 minutes.
 
-The video is recorded in **simulated TideCloak mode** (banner visible). On 22 Oct 2026, Tide's licence service returned `Midgard.FinalizeWallet 500` during realm setup. We therefore followed the organisers' fallback instruction: *"Build this app as though TideCloak protects it. Use Tide's MCP to plan where TideCloak fits, and simulate TideCloak's sign-in, roles and access checks for now."* The plan made with Tide's MCP is in [docs/TIDECLOAK_PLAN.md](docs/TIDECLOAK_PLAN.md). Sign-in, roles and access checks are simulated exactly where TideCloak enforces them. The same screens run on real TideCloak when `NEXT_PUBLIC_PREVIEW_MODE` is unset, which is the default.
+The video is recorded in **simulated TideCloak mode** (banner visible). On 22 Oct 2026, Tide's licence service returned `Midgard.FinalizeWallet 500` during realm setup. We therefore followed the organisers' fallback instruction: *"Build this app as though TideCloak protects it. Use Tide's MCP to plan where TideCloak fits, and simulate TideCloak's sign-in, roles and access checks for now."* The plan made with Tide's MCP is in [docs/TIDECLOAK_PLAN.md](docs/TIDECLOAK_PLAN.md). Sign-in, roles and access checks are simulated exactly where TideCloak enforces them. **Simulated mode is the default**. Set `NEXT_PUBLIC_PREVIEW_MODE=0` to run the same screens on real TideCloak.
 
-## What is real and what is simulated
+## What is real and what is simulated (real TideCloak mode, `NEXT_PUBLIC_PREVIEW_MODE=0`)
 
 | Part | Status |
 |---|---|
@@ -49,15 +49,17 @@ Where each TideCloak capability fits, including the next step (Forseti policy-go
 
 1. Open this repository in Codespaces: **Code → Codespaces → Create codespace on main**.
 2. Wait for the automatic setup. It installs `libssl-dev`, rewrites the config files with your Codespace URLs, runs `npm install`, starts TideCloak in Docker and runs the Next.js dev server.
-3. The app opens on port **3000**, and TideCloak runs on port **8080** (admin console login `admin` / `password`). If the page says the TideCloak port is private, open the **Ports** tab, right-click port 8080 and set it to Public.
-4. Accept the "Invitation to Bid" email mock-up, then create or link a Tide account and log in.
-5. Suggested path: **My Sealed Bid** (seal a price) → **Insider View** → **Tender Committee** (join, untick *Accept submissions* and tick *Open* on the financial envelope, table the motion, review, sign, commit) → **Tender Board**.
+3. The app opens on port **3000** in **simulated TideCloak mode** (the default). Click **Sign in with Tide (simulated)** and pick a persona: Vendor A, Procurement head, IT admin / DBA or AI evaluation agent. Each persona has its own roles. Every protected action goes through an allow/deny check with a logged reason, and `middleware.js` applies a simulated server-side route check. A "Preview mode — simulated" banner is always shown.
+4. Suggested path:
+   - **Vendor A**: seal a price.
+   - **IT admin**: on **Insider View**, try to decrypt.
+   - **Procurement head**: on **Tender Committee**, try *Extend deadline*, then *Open financial envelopes*. Table the motion, review it, and commit at 3/5.
+   - **AI agent**: on **Tender Board**, request prices.
+   - Use **Switch** in the nav to change persona and **Reset demo state** on the sign-in page.
 
-To start again from a clean realm, run `bash reset-and-restart.sh` and restart the dev server.
+### Real TideCloak mode
 
-### Offline preview (only if Tide's network is unavailable)
-
-Set `NEXT_PUBLIC_PREVIEW_MODE=1` in `.env` and restart `npm run dev` to click through every screen with **simulated** login, encryption and approvals. You sign in as one of four personas (Vendor A, Procurement head, IT admin / DBA, AI evaluation agent). Each persona has its own roles, every protected action goes through an allow/deny check with a logged reason, and `middleware.js` applies a simulated server-side route check. A permanent amber "PREVIEW MODE — simulated" banner is shown, and nothing talks to TideCloak. Preview mode is off by default; the prototype itself runs on real TideCloak.
+Add `NEXT_PUBLIC_PREVIEW_MODE=0` to `.env` and restart `npm run dev`. TideCloak runs on port **8080** (admin console `admin` / `password`). If the page says the TideCloak port is private, open the **Ports** tab and set 8080 to Public. Accept the "Invitation to Bid" email mock-up, link a Tide account and log in. Per Tide's MCP, use your own licence email and accept Tide's Terms (https://tide.org/legal) before realm setup. To start again from a clean realm, run `bash reset-and-restart.sh`.
 
 ## Tóm tắt tiếng Việt
 

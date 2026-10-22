@@ -13,7 +13,7 @@ const routesRoles = [
 export async function middleware(req) {
   // Preview mode (SIMULATED server-side check). In real mode this is the TideCloak JWT/role check
   // (verifyTideCloakToken below): a UI check is not authorization, the server must enforce it.
-  if (process.env.NEXT_PUBLIC_PREVIEW_MODE === "1") {
+  if (process.env.NEXT_PUBLIC_PREVIEW_MODE !== "0") {
     const persona = req.cookies?.get("sim_persona")?.value;
     if (!["vendor", "procurement", "itadmin", "ai"].includes(persona)) {
       return NextResponse.redirect(new URL("/", req.url));

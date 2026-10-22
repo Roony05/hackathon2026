@@ -26,4 +26,4 @@ Planned with Tide's MCP (`@tideorg/mcp` v1.9.33). Its scenario match was **`iga-
 ## Real-mode setup notes (from the Tide MCP work order)
 
 - **Before creating a realm**, the licence email and acceptance of Tide's Terms (https://tide.org/legal) must come from the user. Don't rely on the playground's default `email@tide.org`.
-- On 22 Oct 2026, `setUpTideRealm` failed upstream with `Midgard.FinalizeWallet 500` (`TIDE-IDPEXT-VENDOR-KEYGEN_FAILED`). That is why the offline preview mode exists. TideCloak mode stays the default.
+- On 22 Oct 2026, `setUpTideRealm` failed upstream with `Midgard.FinalizeWallet 500` (`TIDE-IDPEXT-VENDOR-KEYGEN_FAILED`). Following the organisers' fallback instruction, the app therefore runs in simulated mode by default. Set `NEXT_PUBLIC_PREVIEW_MODE=0` for real TideCloak.
