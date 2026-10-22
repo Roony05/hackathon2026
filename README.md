@@ -1,5 +1,3 @@
-# 🔒 Sealed Tender
-
 ## Project overview
 
 **Sealed Tender is a two-envelope procurement portal where bids stay sealed until a tender-committee quorum opens them: no procurement head, IT admin, platform operator or AI agent can peek early or bend the rules alone.**
@@ -52,6 +50,10 @@ Vendor A seals a price nobody can reopen, not even Vendor A. The Insider View sh
 5. Suggested path: **My Sealed Bid** (seal a price) → **Insider View** → **Tender Committee** (join, untick *Accept submissions* and tick *Open* on the financial envelope, table the motion, review, sign, commit) → **Tender Board**.
 
 To start again from a clean realm, run `bash reset-and-restart.sh` and restart the dev server.
+
+### Offline preview (only if Tide's network is unavailable)
+
+Set `NEXT_PUBLIC_PREVIEW_MODE=1` in `.env` and restart `npm run dev` to click through every screen with **simulated** login, encryption and approvals. A permanent amber "PREVIEW MODE — simulated" banner is shown, and nothing talks to TideCloak. Preview mode is off by default; the prototype itself runs on real TideCloak.
 
 ## Tóm tắt tiếng Việt
 
