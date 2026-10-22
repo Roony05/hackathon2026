@@ -23,7 +23,9 @@ Vendor A seals a price nobody can reopen, not even Vendor A. The Insider View sh
 
 ## 🎬 Demo video
 
-[demo.mp4](./demo.mp4) — 2 minutes.
+▶️ **Watch the 2-minute demo:** [Google Drive](https://drive.google.com/file/d/1vVcIFY7MvH7Lt1LgnEbsAMfLfcws3YvU/view?usp=sharing)
+
+The original recording is 142 MB, over GitHub's 100 MB file limit. A compressed copy, [demo.mp4](./demo.mp4), is added to this repo.
 
 The video is recorded in **simulated TideCloak mode** (banner visible). On 22 Oct 2026, Tide's licence service returned `Midgard.FinalizeWallet 500` during realm setup. We therefore followed the organisers' fallback instruction: *"Build this app as though TideCloak protects it. Use Tide's MCP to plan where TideCloak fits, and simulate TideCloak's sign-in, roles and access checks for now."* The plan made with Tide's MCP is in [docs/TIDECLOAK_PLAN.md](docs/TIDECLOAK_PLAN.md). Sign-in, roles and access checks are simulated exactly where TideCloak enforces them. **Simulated mode is the default**. Set `NEXT_PUBLIC_PREVIEW_MODE=0` to run the same screens on real TideCloak.
 
