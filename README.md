@@ -49,7 +49,7 @@ Where each TideCloak capability fits, including the next step (Forseti policy-go
 
 1. Open this repository in Codespaces: **Code → Codespaces → Create codespace on main**.
 2. Wait for the automatic setup. It installs `libssl-dev`, rewrites the config files with your Codespace URLs, runs `npm install`, starts TideCloak in Docker and runs the Next.js dev server.
-3. The app opens on port **3000** in **simulated TideCloak mode** (the default). Click **Sign in with Tide (simulated)** and pick a persona: Vendor A, Procurement head, IT admin / DBA or AI evaluation agent. Each persona has its own roles. Every protected action goes through an allow/deny check with a logged reason, and `middleware.js` applies a simulated server-side route check. A "Preview mode — simulated" banner is always shown.
+3. The app opens on port **3000** in **simulated TideCloak mode** (the default). Click **Sign in with Tide (simulated)** and pick a persona: Vendor A, Procurement head, IT admin / DBA or AI evaluation agent. Each persona has its own roles. Every protected action goes through an allow/deny check with a logged reason, and `middleware.js` applies a simulated server-side route check. A "Preview mode — simulated" banner is always shown. In this mode the ciphertext is a **placeholder** in TideCloak's format (`AQAAAAEAAAAB…` header plus random bytes); no real cryptography runs. Real encryption, done by Tide's network, happens only in TideCloak mode.
 4. Suggested path:
    - **Vendor A**: seal a price.
    - **IT admin**: on **Insider View**, try to decrypt.
