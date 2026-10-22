@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
+import TiltCard from "../components/TiltCard";
 import { FaLock, FaCheckCircle, FaShieldAlt, FaKey, FaUsers, FaMicrochip } from "react-icons/fa";
 import { useAuth } from "../context/AuthProvider";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
 import { TENDER, VENDORS, formatVND, Vi } from "../tenderStory";
+
+const Vault3D = dynamic(() => import("../components/Vault3D"), { ssr: false, loading: () => <div className="h-full w-full" /> });
 
 const STEPS = [
   { n: 1, label: "Bidding open", vi: "Đang nhận hồ sơ" },
@@ -154,9 +159,10 @@ export default function TenderBoard() {
       <div className="container mx-auto max-w-screen-lg px-4 space-y-6">
 
         {/* Header card */}
-        <section className="rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">Tender {TENDER.id}</p>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">{TENDER.title}</h1>
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="glass-strong grid gap-6 p-6 md:grid-cols-[1fr_280px]">
+          <div>
+          <p className="text-sm font-semibold uppercase tracking-widest text-amber-300">Tender {TENDER.id}</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-100">{TENDER.title}</h1>
           <Vi>{TENDER.titleVi}</Vi>
           <dl className="mt-4 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
             <div>
@@ -183,11 +189,15 @@ export default function TenderBoard() {
               </dd>
             </div>
           </dl>
-        </section>
+          </div>
+          <div className={`h-[260px] overflow-hidden rounded-2xl border border-white/10 bg-black/20 ${phase === 3 ? "glow-emerald" : "glow-gold"}`}>
+            <Vault3D state={phase === 3 ? "open" : "sealed"} signatures={phase === 3 ? 3 : phase === 2 ? 3 : 1} className="h-full w-full" />
+          </div>
+        </motion.section>
 
         {/* Phase stepper */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-900">Tender phase</h2>
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="glass p-6">
+          <h2 className="text-xl font-bold tracking-tight text-slate-100">Tender phase</h2>
           <Vi>Giai đoạn đấu thầu (suy ra từ vai trò thật trong TideCloak)</Vi>
           <ol className="mt-4 grid gap-4 md:grid-cols-3">
             {STEPS.map((s) => {
@@ -198,16 +208,16 @@ export default function TenderBoard() {
                   key={s.n}
                   className={`rounded-2xl border p-4 ${
                     active
-                      ? "border-blue-500 bg-blue-50 shadow-md"
+                      ? (s.n === 3 ? "glow-emerald bg-emerald-400/10" : "glow-gold bg-amber-300/10")
                       : done
-                      ? "border-green-300 bg-green-50"
-                      : "border-gray-200 bg-gray-50 opacity-70"
+                      ? "border-emerald-400/40 bg-emerald-400/10"
+                      : "border-white/10 bg-white/5 opacity-60"
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <span
                       className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
-                        active ? "bg-blue-600 text-white" : done ? "bg-green-600 text-white" : "bg-gray-300 text-gray-700"
+                        active ? (s.n === 3 ? "bg-emerald-400 text-slate-900 shadow-[0_0_14px_rgba(52,211,153,0.7)]" : "bg-amber-400 text-slate-900 shadow-[0_0_14px_rgba(245,196,81,0.7)]") : done ? "bg-emerald-500 text-slate-900" : "bg-white/15 text-slate-300"
                       }`}
                     >
                       {done ? <FaCheckCircle /> : s.n}
@@ -215,7 +225,7 @@ export default function TenderBoard() {
                     <span className="font-semibold text-gray-900">{s.label}</span>
                   </div>
                   <Vi>{s.vi}</Vi>
-                  {active && <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-blue-700">Current phase</p>}
+                  {active && <p className={`mt-2 text-xs font-semibold uppercase tracking-wide ${s.n === 3 ? "text-emerald-300" : "text-amber-300"}`}>Current phase</p>}
                   <p className="mt-2 text-xs text-gray-600">
                     Changing steps requires a committee motion with 3/5 signatures.{" "}
                     <Link href="/admin" className="text-blue-600 underline">Tender Committee</Link>
@@ -224,14 +234,14 @@ export default function TenderBoard() {
               );
             })}
           </ol>
-        </section>
+        </motion.section>
 
         {/* Bids table */}
-        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-900">Bids</h2>
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="glass p-6">
+          <h2 className="text-xl font-bold tracking-tight text-slate-100">Bids</h2>
           <Vi>Hồ sơ dự thầu</Vi>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full overflow-hidden rounded-xl text-left text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-gray-600">
                   <th className="py-2 pr-4 font-semibold">Vendor</th>
@@ -244,7 +254,7 @@ export default function TenderBoard() {
                 {ordered.map((r) => {
                   const isLowest = phase === 3 && r.key === lowestKey;
                   return (
-                    <tr key={r.key} className={`border-b border-gray-100 align-top ${isLowest ? "bg-green-50" : ""}`}>
+                    <tr key={r.key} className={`border-b border-white/5 align-top transition hover:bg-white/5 ${isLowest ? "bg-emerald-400/10 shadow-[inset_0_0_30px_rgba(52,211,153,0.18)]" : ""}`}>
                       <td className="py-3 pr-4">
                         <div className="font-medium text-gray-900">{r.v.name}</div>
                         {r.you && <Vi>{r.v.nameVi}</Vi>}
@@ -259,7 +269,7 @@ export default function TenderBoard() {
                       <td className="py-3 pr-4">
                         {r.techSealed ? (
                           <div>
-                            <span className="inline-flex items-center gap-1 font-medium text-gray-700"><FaLock className="text-gray-500" /> Sealed</span>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-300/10 px-2 py-0.5 text-xs font-semibold text-amber-300">🔒 Sealed</span>
                             <div className="break-all font-mono text-xs text-gray-400">{r.techSnippet}</div>
                           </div>
                         ) : (
@@ -269,13 +279,13 @@ export default function TenderBoard() {
                       <td className="py-3 pr-4">
                         {r.priceStatus === "open" && (
                           <div>
-                            <div className="font-semibold text-gray-900">{formatVND(r.price)}</div>
+                            <div className="font-semibold text-emerald-300">{formatVND(r.price)}</div>
                             <div className="text-xs text-gray-500">{pct(r.price)}</div>
                           </div>
                         )}
                         {r.priceStatus === "sealed" && (
                           <div>
-                            <span className="inline-flex items-center gap-1 font-medium text-gray-700"><FaLock className="text-gray-500" /> Sealed</span>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-300/10 px-2 py-0.5 text-xs font-semibold text-amber-300">🔒 Sealed</span>
                             <div className="break-all font-mono text-xs text-gray-400">{r.snippet}</div>
                           </div>
                         )}
@@ -303,11 +313,11 @@ export default function TenderBoard() {
           {phase === 3 && (
             <p className="mt-3 text-xs text-gray-500">Sorted by price, lowest first. Percentages are relative to the buyer's estimate of {formatVND(estimate)}.</p>
           )}
-        </section>
+        </motion.section>
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Who tried to break the rules */}
-          <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <TiltCard className="p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">Who tried to break the rules</h2>
               <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">illustrative</span>
@@ -322,10 +332,10 @@ export default function TenderBoard() {
                 </li>
               ))}
             </ul>
-          </section>
+          </TiltCard>
 
           {/* Why this can't be rigged */}
-          <section className="rounded-2xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
+          <TiltCard className="p-6">
             <h2 className="text-xl font-bold text-gray-900">Why this can't be rigged</h2>
             <Vi>Vì sao không thể thông thầu</Vi>
             <ul className="mt-3 space-y-3 text-sm text-gray-800">
@@ -336,18 +346,18 @@ export default function TenderBoard() {
             <p className="mt-4 text-sm font-medium text-gray-900">
               With ordinary login and backend permissions, whoever runs the database is the person you have to trust - that is exactly how bid rigging happens.
             </p>
-          </section>
+          </TiltCard>
         </div>
 
         {/* Navigation buttons */}
         <div className="flex flex-wrap gap-3">
-          <Link href="/user" className="inline-flex items-center gap-2 rounded bg-gray-800 px-5 py-2 text-white transition hover:bg-blue-600">
+          <Link href="/user" className="btn-ghost">
             <FaLock /> My Sealed Bid
           </Link>
-          <Link href="/databaseExposure" className="inline-flex items-center gap-2 rounded bg-gray-800 px-5 py-2 text-white transition hover:bg-blue-600">
+          <Link href="/databaseExposure" className="btn-ghost">
             <FaShieldAlt /> Insider View
           </Link>
-          <Link href="/admin" className="inline-flex items-center gap-2 rounded bg-gray-800 px-5 py-2 text-white transition hover:bg-blue-600">
+          <Link href="/admin" className="btn-ghost">
             <FaUsers /> Tender Committee
           </Link>
         </div>

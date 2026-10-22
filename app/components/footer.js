@@ -12,7 +12,7 @@ import { SiX } from "react-icons/si";
  */
 export default function Footer(){
     return (
-        <footer className="mt-auto p-4 bg-gray-100 flex flex-col md:flex-row justify-between items-center text-sm gap-2 md:gap-0">
+        <footer className="mt-auto border-t border-white/10 bg-white/5 backdrop-blur-xl text-slate-400 px-6 py-5 flex flex-col md:flex-row justify-between items-center text-sm gap-2 md:gap-0">
 
         <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
           <p className="font-medium">
@@ -24,7 +24,7 @@ export default function Footer(){
           </p>
           <a
             href="https://tide.org/alpha"
-            className="px-3 py-1 bg-gray-800 text-white rounded hover:bg-blue-500 transition"
+            className="px-3 py-1 rounded-full border border-white/20 bg-white/5 text-slate-200 hover:border-amber-300/60 hover:text-amber-200 transition"
             target="_blank"
           >
             Join the Alpha program

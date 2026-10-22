@@ -1,7 +1,8 @@
 // app/layout.js
 import "./styles/tailwind.css";
 import "./styles/spinKit.css";
-import "./styles/loading.css"
+import "./styles/loading.css";
+import "./styles/vault-theme.css";
 import { AuthProvider } from "./context/AuthProvider";
 import Nav from "./components/nav";
 import Footer from "./components/footer";
@@ -21,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col bg-white">
+      <body className="vault min-h-screen flex flex-col">
         <div id="loading-overlay-root" className="pointer-events-none fixed inset-0 z-50" />
         <AuthProvider>
           <Nav />

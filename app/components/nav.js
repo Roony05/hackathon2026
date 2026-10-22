@@ -21,22 +21,22 @@ export default function Nav() {
 
   // Utility to highlight the active button
   const getButtonClasses = (route) =>
-    pathname === route ? "bg-blue-100 text-blue-700" : "hover:bg-gray-100";
+    pathname === route ? "vault-nav-link active" : "vault-nav-link";
 
   // Hide nav on landing & failure pages
   if (pathname === "/" || pathname === "/fail") return null;
 
   return (
-    <nav className="flex items-center gap-4 border-b border-gray-200 px-8 py-4">
+    <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE === "1" ? 44 : 0 }} className="sticky z-40flex flex-wrap items-center gap-2 border-b border-white/10 bg-slate-950/70 px-6 py-3 backdrop-blur-xl shadow-[0_1px_24px_rgba(245,196,81,0.12)]">
       {/* Logo → home page */}
       <Link href="/home" className="inline-block">
-        <span className="text-xl font-bold text-gray-800 cursor-pointer">🔒 Sealed Tender</span>
+        <span className="mr-4 cursor-pointer text-xl font-bold tracking-tight text-gradient-gold">🔒 Sealed Tender</span>
       </Link>
 
       <button
         onClick={() => handleNavigate("/tender")}
         disabled={backgroundProcessing}
-        className={`px-4 py-2 rounded transition ${getButtonClasses("/tender")} ${
+        className={`${getButtonClasses("/tender")} ${
           backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
@@ -46,7 +46,7 @@ export default function Nav() {
       <button
         onClick={() => handleNavigate("/user")}
         disabled={backgroundProcessing}
-        className={`px-4 py-2 rounded transition ${getButtonClasses("/user")} ${
+        className={`${getButtonClasses("/user")} ${
           backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
@@ -56,7 +56,7 @@ export default function Nav() {
       <button
         onClick={() => handleNavigate("/databaseExposure")}
         disabled={backgroundProcessing}
-        className={`px-4 py-2 rounded transition ${getButtonClasses("/databaseExposure")} ${
+        className={`${getButtonClasses("/databaseExposure")} ${
           backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
@@ -66,14 +66,14 @@ export default function Nav() {
       <button
         onClick={() => handleNavigate("/admin")}
         disabled={backgroundProcessing}
-        className={`px-4 py-2 rounded transition ${getButtonClasses("/admin")} ${
+        className={`${getButtonClasses("/admin")} ${
           backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
         Tender Committee
       </button>
 
-      <Button onClick={() => auth.logout()}>Logout</Button>
+      <Button className="ml-auto" onClick={() => auth.logout()}>Logout</Button>
     </nav>
   );
 }

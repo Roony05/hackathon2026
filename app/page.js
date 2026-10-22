@@ -324,8 +324,8 @@ function Login() {
 </AccordionBox>
 
 
-              <div className="bg-blue-50 rounded shadow p-6 space-y-4">
-                <div className="text-xl font-bold text-gray-800">🔒 Sealed Tender</div>
+              <div className="glass-strong glow-gold p-8 space-y-4">
+                <div className="text-xl font-bold tracking-tight text-gradient-gold">🔒 Sealed Tender</div>
                 <h2 className="text-3xl font-bold">
                   Sealed bids that nobody can open early
                 </h2>

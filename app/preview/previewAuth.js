@@ -273,7 +273,7 @@ function PreviewBanner() {
         style={{
           position: "fixed", top: 0, left: 0, right: 0, height: BANNER_HEIGHT, zIndex: 100000,
           boxSizing: "border-box", padding: "3px 8px", textAlign: "center", lineHeight: 1.25,
-          background: "#fbbf24", color: "#451a03", borderBottom: "2px solid #b45309",
+          background: "linear-gradient(90deg,#1a1405,#2b200a,#1a1405)", color: "#fde68a", borderBottom: "1px solid rgba(245,196,81,0.6)", boxShadow: "0 0 20px rgba(245,196,81,0.25)", backdropFilter: "blur(10px)",
           fontSize: 12, fontWeight: 600, display: "flex", flexDirection: "column", justifyContent: "center",
         }}
       >
@@ -412,22 +412,22 @@ export function PreviewLanding() {
   return (
     <main className="flex-grow w-full pt-6 pb-16">
       <div className="w-full px-8 max-w-screen-md mx-auto">
-        <div className="bg-amber-50 border border-amber-300 rounded shadow p-6 space-y-4">
-          <div className="text-xl font-bold text-gray-800">🔒 Sealed Tender</div>
-          <h2 className="text-3xl font-bold">Preview mode</h2>
+        <div className="glass-strong glow-gold p-8 space-y-4">
+          <div className="text-xl font-bold tracking-tight text-gradient-gold">🔒 Sealed Tender</div>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-100">Preview mode</h2>
           <p>
             The Tide network is not used here. Login, encryption and committee approvals are all simulated locally in your browser so you can click through every screen.
           </p>
           <p className="text-sm italic text-gray-600">Chế độ xem trước: mọi thứ được mô phỏng cục bộ.</p>
           <div className="flex items-center gap-4">
-            <Link href="/home" className="inline-block rounded bg-gray-800 px-5 py-2 text-white hover:bg-red-700">
+            <Link href="/home" className="btn-gold">
               Enter preview
             </Link>
             <button
               type="button"
               disabled={clearing}
               onClick={() => { setClearing(true); resetPreviewState(); window.location.reload(); }}
-              className="text-sm text-gray-500 underline"
+              className="btn-ghost !px-4 !py-2 text-sm"
             >
               Reset demo state
             </button>

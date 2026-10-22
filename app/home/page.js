@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
 import { FaClipboardList, FaLock, FaDatabase, FaUsers } from "react-icons/fa";
 import AccordionBox from "../components/accordionBox";
+import TiltCard from "../components/TiltCard";
 import { useAuth } from "../context/AuthProvider";
 import { Vi } from "../tenderStory";
+
+const Vault3D = dynamic(() => import("../components/Vault3D"), { ssr: false, loading: () => <div className="h-full w-full" /> });
 
 export default function HomePage() {
   const auth = useAuth();
@@ -21,16 +26,38 @@ export default function HomePage() {
 
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-12">
-      <h1 className="text-center text-3xl font-bold">Sealed Tender</h1>
-      <p className="text-center"><Vi>Hồ sơ thầu không ai mở trộm được</Vi></p>
-      <p className="mx-auto mb-4 mt-4 max-w-2xl text-center text-gray-600">
-        <span className="font-semibold">The problem:</span> in bid rigging, an insider peeks at competitors' prices and tips off a
-        favoured vendor, or quietly extends the deadline for them. With ordinary login and backend permissions, the DBA or the
-        procurement head can do exactly that - and nobody would know.
-      </p>
+      {/* Hero */}
+      <motion.section
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="grid items-center gap-8 md:grid-cols-2"
+      >
+        <div>
+          <span className="inline-block rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-200">
+            Sealed two-envelope bidding
+          </span>
+          <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-gradient-gold md:text-5xl">
+            Sealed bids nobody can open early
+          </h1>
+          <p className="mt-2"><Vi>Hồ sơ thầu không ai mở trộm được</Vi></p>
+          <p className="mt-5 max-w-xl text-slate-300">
+            <span className="font-semibold text-slate-100">The problem:</span> in bid rigging, an insider peeks at competitors' prices and tips off a
+            favoured vendor, or quietly extends the deadline for them. With ordinary login and backend permissions, the DBA or the
+            procurement head can do exactly that - and nobody would know.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/tender" className="btn-gold">Tender Board</Link>
+            <Link href="/user" className="btn-ghost">My Sealed Bid</Link>
+          </div>
+        </div>
+        <div className="glass-strong glow-gold h-[420px] overflow-hidden">
+          <Vault3D state="sealed" signatures={1} className="h-full w-full" />
+        </div>
+      </motion.section>
 
       {/* Toggle emoji */}
-      <div className="relative mb-2 flex justify-center">
+      <div className="relative mb-2 mt-10 flex justify-center">
         <button
           onClick={() => setShowHomeAccordion(!showHomeAccordion)}
           className="text-2xl hover:scale-110 transition-transform"
@@ -57,29 +84,32 @@ export default function HomePage() {
 
       {/* Demo tiles */}
       <div className="mt-10 grid gap-6 sm:grid-cols-2">
-        {demos.map(({ title, sub, href, icon: Icon }) => (
-          <Link
+        {demos.map(({ title, sub, href, icon: Icon }, i) => (
+          <motion.div
             key={href}
-            href={href}
-            onClick={(e) => {
-              if (backgroundProcessing) {
-                e.preventDefault();
-              }
-            }}
-            className={`group ${backgroundProcessing ? 'pointer-events-none' : ''}`}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
           >
-            <div className={`flex h-full flex-col items-center justify-center gap-3
-                            rounded-2xl border border-gray-200 bg-gray-50 p-8 text-center
-                            shadow-sm transition-all duration-200
-                            group-hover:border-blue-500 group-hover:bg-blue-50 group-hover:shadow-md
-                            ${backgroundProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}>
-              <Icon className="h-10 w-10 text-gray-600 transition-transform duration-200 group-hover:scale-105 group-hover:text-blue-600" />
-              <span className="text-lg font-semibold tracking-tight text-gray-800 group-hover:text-blue-700">
-                {title}
-              </span>
-              <span className="text-sm text-gray-500">{sub}</span>
-            </div>
-          </Link>
+            <Link
+              href={href}
+              onClick={(e) => {
+                if (backgroundProcessing) {
+                  e.preventDefault();
+                }
+              }}
+              className={`group block h-full ${backgroundProcessing ? "pointer-events-none cursor-not-allowed opacity-50" : ""}`}
+            >
+              <TiltCard className="flex flex-col items-center justify-center gap-3 p-8 text-center">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-300/30 bg-amber-300/10 shadow-[0_0_20px_rgba(245,196,81,0.2)]">
+                  <Icon className="h-7 w-7 text-amber-300 transition-transform duration-200 group-hover:scale-110" />
+                </span>
+                <span className="text-lg font-semibold tracking-tight text-slate-100">{title}</span>
+                <span className="text-sm text-slate-400">{sub}</span>
+              </TiltCard>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </main>
