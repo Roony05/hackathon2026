@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthProvider";
 import appService from "../../lib/appService";
 import AccordionBox from "../components/accordionBox";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
-import { FIELDS, VENDORS, Vi } from "../tenderStory";
+import { FIELDS, VENDORS } from "../tenderStory";
 import '../styles/spinKit.css';
 import "../styles/spinner.css";
 
@@ -72,13 +72,13 @@ function DecryptedRow({ isUser, user, username, dob, cc, auth }) {
 
         // Can't decrypt other users
         if (!isUser) {
-            setDecryptionStatus("Access denied: You don't have decryption rights.");
+            setDecryptionStatus("Access denied: No decryption rights.");
             setTimeout(() => setDecryptionStatus(""), 3000);
             return;
         }
         else if (!canReadDob && !canReadCc){
             // Show error if no read permissions at all
-            setDecryptionStatus("Access denied: You don't have decryption rights.");
+            setDecryptionStatus("Access denied: No decryption rights.");
             setTimeout(() => setDecryptionStatus(""), 3000);
             return;
         };
@@ -133,21 +133,21 @@ function DecryptedRow({ isUser, user, username, dob, cc, auth }) {
     };
     
     return (
-    <div className="border border-gray-300 rounded p-4 bg-white shadow-sm space-y-2">
+    <div className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm space-y-2">
         <div className="text-sm font-mono break-all">
-            <strong className="block text-gray-600 text-xs uppercase mb-1">Vendor</strong>
+            <strong className="block text-slate-600 text-xs uppercase mb-1">Vendor</strong>
             {VENDORS[username]?.name ?? username}
         </div>
 
         <div className="text-sm font-mono break-all">
-            <strong className="block text-gray-600 text-xs uppercase mb-1">{FIELDS.dob.short}</strong>
+            <strong className="block text-slate-600 text-xs uppercase mb-1">{FIELDS.dob.short}</strong>
             <span className={`inline-block transition-opacity duration-500 ${animating ? "opacity-0" : "opacity-100"}`}>
             {isUser && decrypted && dob && canReadDob? <DecryptingText text={decryptedDob} /> : dob}
             </span>
         </div>
 
         <div className="text-sm font-mono break-all">
-            <strong className="block text-gray-600 text-xs uppercase mb-1">{FIELDS.cc.short}</strong>
+            <strong className="block text-slate-600 text-xs uppercase mb-1">{FIELDS.cc.short}</strong>
             <span className={`inline-block transition-opacity duration-500 ${animating ? "opacity-0" : "opacity-100"}`}>
             {isUser && decrypted && cc && canReadCc? <DecryptingText text={decryptedCc} /> : cc}
             </span>
@@ -155,7 +155,7 @@ function DecryptedRow({ isUser, user, username, dob, cc, auth }) {
 
         <div className="flex items-center gap-3">
             
-            <Button className="hover:bg-red-700" onClick={handleDecrypt} disabled={decrypted ? decrypted : loadingButton}>
+            <Button className="rounded-full bg-indigo-600 text-white hover:bg-indigo-700" onClick={handleDecrypt} disabled={decrypted ? decrypted : loadingButton}>
                 {decrypted ? "✓ Decrypted" : "Decrypt"}
             </Button>                 
             {
@@ -230,44 +230,45 @@ export default function DatabaseExposure() {
 
   <button
     onClick={() => setShowExposureAccordion(x => !x)}
-    className="absolute top-0 right-0 text-2xl hover:scale-110 transition-transform"
+    className="rounded-full absolute top-0 right-0 text-2xl hover:scale-110 transition-transform"
     aria-label="Toggle explanation"
   >
     {showExposureAccordion ? "🤯" : "🤔"}
   </button>
 
-  <h3 className="text-2xl font-semibold">Insider View<Vi>Góc nhìn người trong cuộc</Vi></h3>
+  <h3 className="text-2xl font-semibold">Insider View</h3>
+  <span className="inline-block rounded-full bg-slate-100 text-slate-700 text-xs px-2.5 py-0.5">Platform · DBA view</span>
 
-    <p className="text-sm text-gray-600 mb-3">
-  Try to read the bids as a DBA or head of procurement - you only get ciphertext.
+    <p className="text-sm text-slate-600 mb-3">
+  Everything an insider can export. All ciphertext.
 </p>
 
 
 <AccordionBox
-  title="Why an exposed database is still unreadable"
+  title="Why exports stay unreadable"
   isOpen={showExposureAccordion}
 >
-    <p className="text-sm text-gray-600 mb-3">
-    A database dump cannot open a sealed bid. Decryption requires the vendor's authenticated session on <em>this</em> device and the matching Read role:
+    <p className="text-sm text-slate-600 mb-3">
+    Exports cannot open sealed bids.
   </p>
   <ul className="list-disc pl-5 space-y-1">
     <li>
-      <strong>Authenticated vendor identity.</strong> BYOiD authenticates against the decentralized Fabric. Holding the procurement database does not let an insider impersonate a vendor.
+      Vendors authenticate before decrypting.
     </li>
     <li>
-      <strong>User, device and session binding.</strong> After BYOiD login, the browser holds a short-lived session key tying the JWT to that device and session. Stolen bid rows or even a stolen JWT lack the key needed for decryption.
-    </li>
-
-    <li>
-      <strong>Ownerless root certificate.</strong> The Fabric signs tokens with a certificate no procurement head, DBA or platform operator controls. A decrypt claim appears only for a vendor holding the matching Read role.
+      Access binds vendor, device and session.
     </li>
 
     <li>
-      <strong>Committee quorum.</strong> Opening financial envelopes requires 3 of 5 committee signatures, enforced by the same root key. No lone insider can mint a token that reads every bid.
+      Insiders cannot grant themselves decryption.
     </li>
 
     <li>
-      <strong>Access stays with each vendor.</strong> Even an authorized vendor can decrypt only their own permitted envelopes, on their device and session. Other vendors' bids remain ciphertext.
+      Opening needs 3 of 5 signatures.
+    </li>
+
+    <li>
+      Vendors decrypt only their permitted envelopes.
     </li>
   </ul>
 </AccordionBox>

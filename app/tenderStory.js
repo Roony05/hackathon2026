@@ -57,6 +57,6 @@ export const formatVND = (value) => {
 };
 
 // Secondary Vietnamese line under an English heading or callout.
-export function Vi({ children, className = "" }) {
-  return <span className={`block text-sm italic text-gray-500 ${className}`}>{children}</span>;
+export function Vi() {
+  return null;
 }

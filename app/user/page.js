@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import AccordionBox from "../components/accordionBox";
 import Button from "../components/button";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
-import { TENDER, FIELDS, Vi } from "../tenderStory";
+import { TENDER, FIELDS } from "../tenderStory";
 import "../styles/spinKit.css";
 import "../styles/spinner.css";
 
@@ -297,7 +297,7 @@ export default function User(){
 
             // Show the confirmation message
             if (response.ok){
-                setUserFeedback("Sealed! Encrypted in your browser before it left.");
+                setUserFeedback("Sealed in your browser.");
                 setTimeout(() => setUserFeedback(""), 3000); // Clear after 3 seconds
                 getAllUsers();
             }
@@ -329,26 +329,26 @@ export default function User(){
                 {/* Accordion toggle */}
                 <button
                   onClick={() => setShowUserInfoAccordion(prev => !prev)}
-                  className="absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"
+                  className="rounded-full absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"
                   aria-label="Toggle explanation"
                 >
                   {showUserInfoAccordion ? "🤯" : "🤔"}
                 </button>
 
                 {/* Accordion content */}
-                <AccordionBox title="Why no one can peek at your bid" isOpen={showUserInfoAccordion}>
+                <AccordionBox title="Why bids stay sealed" isOpen={showUserInfoAccordion}>
   <ul className="list-disc pl-5 space-y-1 mt-2">
     <li>
-      <strong>No insider preview.</strong> The procurement head, DBA, platform operator and any AI agent see only ciphertext in the database.
+      Insiders see only ciphertext.
     </li>
     <li>
-      <strong>Decryption at the edge.</strong> Only the role holder can decrypt in their browser session; the Fabric never sees the bid plaintext.
+      Decrypt in your authorized browser.
     </li>
     <li>
-      <strong>Committee quorum.</strong> Changing envelope access needs 3 of 5 committee signatures, including opening the financial envelopes.
+      Opening requires 3 of 5 signatures.
     </li>
     <li>
-      <strong>Signed and auditable.</strong> Every change to the tender rules is signed and recorded in a tamper-evident audit trail.
+      Every rule change is signed.
     </li>
   </ul>
 
@@ -356,19 +356,21 @@ export default function User(){
 
 
 
-                <h2 className="text-3xl font-bold mb-4">My Sealed Bid<Vi>Hồ sơ dự thầu niêm phong của tôi</Vi></h2>
-                <p className="text-sm text-gray-600">{TENDER.id} · {TENDER.title} · {TENDER.buyer}</p>
+                <h2 className="text-3xl font-bold mb-4">My Sealed Bid</h2>
+                <span className="inline-block rounded-full bg-emerald-50 text-emerald-700 text-xs px-2.5 py-0.5">Seller · Vendor A</span>
+                <p className="text-sm text-slate-600">Seal your bid. Nobody can open it before the committee does.</p>
+                <p className="text-sm text-slate-600">{TENDER.id} · {TENDER.title} · {TENDER.buyer}</p>
                 {(
                   !auth.hasOneRole("_tide_dob.selfdecrypt") &&
                   !auth.hasOneRole("_tide_dob.selfencrypt") &&
                   !auth.hasOneRole("_tide_cc.selfdecrypt") &&
                   !auth.hasOneRole("_tide_cc.selfencrypt")
                 ) ? (
-                  <p className="text-sm text-gray-600 mb-6">
-                    No envelope access until the committee grants the roles.
+                  <p className="text-sm text-slate-600 mb-6">
+                    Awaiting committee access.
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-600 mb-6">Vendor A: price is write-only until 3 of 5 members open it.</p>
+                  <p className="text-sm text-slate-600 mb-6">Prices stay sealed until committee opening.</p>
                 )}
 
                 <form className="space-y-6" onSubmit={handleFormSubmit}>
@@ -383,23 +385,23 @@ export default function User(){
                     if (!canRead && !canWrite) {
                       return (
                         <div key={i}>
-                          <p className="font-medium text-sm">{label}<Vi>{FIELDS[field].vi}</Vi></p>
-                          <span className="inline-block mt-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">🔒 Sealed</span>
+                          <p className="font-medium text-sm">{label}</p>
+                          <span className="inline-block mt-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">🔒 Sealed</span>
                           {showUserInfoAccordion && (
-                            <div className="text-xs text-gray-600 mt-2 space-y-2 bg-gray-50 border border-gray-200 rounded p-3">
-                              <h5 className="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">
-                                JWT Permissions &amp; Encrypted Value
+                            <div className="text-xs text-slate-600 mt-2 space-y-2 bg-slate-50 border border-slate-200 rounded-2xl p-3">
+                              <h5 className="font-semibold text-slate-600 text-xs uppercase tracking-wide mb-1">
+                                Permissions &amp; ciphertext
                               </h5>
                               <div className="flex gap-2">
                                 <span
-                                  className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+                                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-2xl text-xs font-medium ${
                                     canRead ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                                   }`}
                                 >
                                   {canRead ? "✓" : "✕"} Read
                                 </span>
                                 <span
-                                  className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+                                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-2xl text-xs font-medium ${
                                     canWrite ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                                   }`}
                                 >
@@ -407,7 +409,7 @@ export default function User(){
                                 </span>
                               </div>
                               <div className="break-words whitespace-pre-wrap text-sm">
-                                <span className="font-medium text-gray-700">Value in Database:</span>{" "}
+                                <span className="font-medium text-slate-600">Stored ciphertext:</span>{" "}
                                 <span
                                   onClick={() =>
                                     setExpandedBlobs(prev => ({ ...prev, [field]: !prev[field] }))
@@ -428,8 +430,8 @@ export default function User(){
                     // Otherwise, render a normal input (read/write, read-only, or write-only)
                     return (
                       <div key={field}>
-                        <label className="block font-medium text-sm mb-1">{label}<Vi>{FIELDS[field].vi}</Vi></label>
-                        <span className="block w-fit mb-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">
+                        <label className="block font-medium text-sm mb-1">{label}</label>
+                        <span className="block w-fit mb-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
                           {canWrite && !canRead
                             ? "🔒 Sealed until opening"
                             : canRead && !canWrite
@@ -443,7 +445,7 @@ export default function User(){
                             placeholder={FIELDS[field].placeholder}
                             value={formData[field]}
                             onChange={handleUserFieldChange(field)}
-                            className="border rounded px-3 py-2 w-full max-w-md"
+                            className="border rounded-2xl px-3 py-2 w-full max-w-md"
                           />
                         )}
 
@@ -454,7 +456,7 @@ export default function User(){
                             placeholder={FIELDS[field].placeholder}
                             value={formData[field] || ""}
                             readOnly
-                            className="border rounded px-3 py-2 w-full bg-gray-100 text-gray-700 max-w-md"
+                            className="border rounded-2xl px-3 py-2 w-full bg-slate-100 text-slate-600 max-w-md"
                           />
                         )}
 
@@ -465,25 +467,25 @@ export default function User(){
                             placeholder={FIELDS[field].placeholder}
                             value={formData[field]}
                             onChange={handleUserFieldChange(field)}
-                            className="border rounded px-3 py-2 w-full max-w-md"
+                            className="border rounded-2xl px-3 py-2 w-full max-w-md"
                           />
                         )}
 
                         {showUserInfoAccordion && (
-                          <div className="text-xs text-gray-600 mt-2 space-y-2 bg-gray-50 border border-gray-200 rounded p-3">
-                            <h5 className="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">
-                              JWT Permissions &amp; Encrypted Value
+                          <div className="text-xs text-slate-600 mt-2 space-y-2 bg-slate-50 border border-slate-200 rounded-2xl p-3">
+                            <h5 className="font-semibold text-slate-600 text-xs uppercase tracking-wide mb-1">
+                              Permissions &amp; ciphertext
                             </h5>
                             <div className="flex gap-2">
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-2xl text-xs font-medium ${
                                   canRead ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                                 }`}
                               >
                                 {canRead ? "✓" : "✕"} Read
                               </span>
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-2xl text-xs font-medium ${
                                   canWrite ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                                 }`}
                               >
@@ -491,7 +493,7 @@ export default function User(){
                               </span>
                             </div>
                             <div className="break-words whitespace-pre-wrap text-sm">
-                              <span className="font-medium text-gray-700">Value in Database:</span>{" "}
+                              <span className="font-medium text-slate-600">Stored ciphertext:</span>{" "}
                               <span
                                 onClick={() =>
                                   setExpandedBlobs(prev => ({ ...prev, [field]: !prev[field] }))
@@ -511,9 +513,8 @@ export default function User(){
 
                   {(auth.hasOneRole("_tide_dob.selfencrypt") || auth.hasOneRole("_tide_cc.selfencrypt")) && (
                     <div className="flex items-center gap-3">
-                      <Button className="hover:bg-red-700" type="submit" disabled={loadingButton}>
+                      <Button className="rounded-full bg-indigo-600 text-white hover:bg-indigo-700" type="submit" disabled={loadingButton}>
                         Seal &amp; Submit
-                        <span className="block text-xs italic text-red-100">Niêm phong &amp; nộp</span>
                       </Button>
                       {loadingButton && <div className="spinner" />}
                       {userFeedback && (

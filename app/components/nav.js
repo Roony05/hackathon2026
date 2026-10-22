@@ -4,7 +4,11 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaLock } from "react-icons/fa";
 import Button from "../components/button";
+import { useEffect } from "react";
 import { useAuth } from "../context/AuthProvider";
+import { releaseScrollIfIdle } from "./loadingSquare";
+
+const SIDE = { vendor: ["Seller", "pill-seller"], procurement: ["Buyer", "pill-buyer"], ai: ["AI", "pill-ai"], itadmin: ["Platform", "pill-platform"] };
 
 /**
  * Top navigation bar shown after login.
@@ -14,6 +18,8 @@ export default function Nav() {
   const { backgroundProcessing } = auth;
   const pathname = usePathname();
   const router   = useRouter();
+
+  useEffect(() => { releaseScrollIfIdle(); }, [pathname]);
 
   // Navigate only if we aren't already on that route and not processing
   const handleNavigate = (route) => {
@@ -33,11 +39,11 @@ export default function Nav() {
   const showAdmin = !pv || pv.persona === "procurement";
 
   return (
-    <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE !== "0" ? 32 : 0 }} className="sticky z-40 flex h-14 flex-wrap items-center gap-1 border-b border-[#1f1f1f] bg-[#0a0a0a]/80 px-6">
+    <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE !== "0" ? 32 : 0 }} className="sticky z-40 flex h-14 flex-wrap items-center gap-1 border-b border-slate-200 bg-white px-6">
       {/* Logo → home page */}
       <Link href="/home" className="mr-4 inline-flex items-center gap-2">
-        <FaLock className="h-3.5 w-3.5 text-neutral-100" />
-        <span className="cursor-pointer text-sm font-semibold tracking-tight text-neutral-100">Sealed Tender</span>
+        <FaLock className="h-3.5 w-3.5 text-indigo-600" />
+        <span className="cursor-pointer text-sm font-semibold tracking-tight text-slate-900">Sealed Tender</span>
       </Link>
 
       <button
@@ -85,9 +91,10 @@ export default function Nav() {
       )}
 
       {pv && pv.persona && (
-        <span className="ml-auto mr-2 flex items-center gap-2 rounded-full border border-[#1f1f1f] bg-[#111] px-3 py-1 text-xs text-neutral-400">
-          Signed in (simulated) as <strong className="font-medium text-neutral-100">{pv.personaLabel}</strong>
-          <button type="button" onClick={() => pv.switchPersona()} className="rounded-full border border-[#2e2e2e] px-2 py-0.5 font-medium text-neutral-200 transition hover:bg-[#1a1a1a]">Switch</button>
+        <span className="ml-auto mr-2 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600">
+          {SIDE[pv.persona] && <span className={`pill ${SIDE[pv.persona][1]}`}>{SIDE[pv.persona][0]}</span>}
+          <strong className="font-medium text-slate-900">{pv.personaLabel}</strong>
+          <button type="button" onClick={() => pv.switchPersona()} className="rounded-full border border-slate-200 px-2 py-0.5 font-medium text-slate-700 transition hover:bg-slate-100">Switch</button>
         </span>
       )}
 

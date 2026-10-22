@@ -5,12 +5,12 @@ import Link from "next/link";
 import { FaLock, FaCheckCircle, FaShieldAlt, FaKey, FaUsers, FaMicrochip } from "react-icons/fa";
 import { useAuth } from "../context/AuthProvider";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
-import { TENDER, VENDORS, formatVND, Vi } from "../tenderStory";
+import { TENDER, VENDORS, formatVND } from "../tenderStory";
 
 const STEPS = [
-  { n: 1, label: "Bidding open", vi: "Đang nhận hồ sơ" },
-  { n: 2, label: "Closed & sealed", vi: "Đã đóng thầu" },
-  { n: 3, label: "Financial envelopes opened", vi: "Đã mở túi tài chính" },
+  { n: 1, label: "Bidding open", },
+  { n: 2, label: "Closed & sealed" },
+  { n: 3, label: "Financial envelopes opened" },
 ];
 
 const FAKE_SNIPPETS = [
@@ -26,10 +26,10 @@ const COULDNT = "Couldn't open in this session";
 const NOT_SUBMITTED = "Not submitted yet";
 
 const ATTEMPTS = [
-  { who: "Procurement head asked IT for the price column", result: "Got ciphertext", vi: "Trưởng phòng mua sắm xin cột giá - chỉ nhận được bản mã" },
-  { who: "IT admin exported the whole database", result: "Ciphertext only", vi: "Quản trị IT xuất toàn bộ CSDL - chỉ có bản mã" },
-  { who: "Procurement head drafted \"extend deadline for Vendor D\"", result: "Stuck at 1/5 signatures", vi: "Dự thảo gia hạn cho nhà thầu D - kẹt ở 1/5 chữ ký" },
-  { who: "AI evaluation agent requested prices before opening", result: "No decrypt role - refused", vi: "Tác tử AI đòi xem giá trước khi mở thầu - bị từ chối" },
+  { who: "Procurement head asked IT for the price column", result: "Got ciphertext" },
+  { who: "IT admin exported the whole database", result: "Ciphertext only" },
+  { who: "Procurement head drafted \"extend deadline for Vendor D\"", result: "Stuck at 1/5 signatures" },
+  { who: "AI evaluation agent requested prices before opening", result: "No decrypt role - refused" },
 ];
 
 export default function TenderBoard() {
@@ -170,11 +170,12 @@ export default function TenderBoard() {
     setAiResult({ allow: true, prices: r.prices, reason: r.reason, rule: r.rule, summary });
   };
 
+  const SIDE = { vendor: ["Seller", "pill-seller"], procurement: ["Buyer", "pill-buyer"], ai: ["AI", "pill-ai"], itadmin: ["Platform", "pill-platform"] };
   const chip = "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium";
   const sealedChip = (
-    <span className={chip + " border border-[#2e2e2e] bg-[#1a1a1a] text-neutral-300"}>🔒 Sealed</span>
+    <span className={chip + " chip-sealed"}>🔒 Sealed</span>
   );
-  const card = "rounded-2xl border border-[#1f1f1f] bg-[#111] p-5 shadow-[0_1px_2px_rgba(0,0,0,.4)]";
+  const card = "rounded-2xl border border-[#e6e8ec] bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,.06)]";
   const liftCard = card + " lift";
 
   return (
@@ -183,11 +184,9 @@ export default function TenderBoard() {
 
         {/* Header */}
         <section className={card}>
-          <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Tender {TENDER.id}</p>
+          <div className="flex flex-wrap items-center gap-2"><span className="pill pill-buyer">Buyer: Lotus Industries</span><span className="text-xs font-medium uppercase tracking-wider text-slate-400">{TENDER.id}</span></div>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-100">{TENDER.title}</h1>
-          <Vi>{TENDER.titleVi}</Vi>
           <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[#1f1f1f] pt-4 text-sm text-neutral-300">
-            <span>{TENDER.buyer}</span><span className="text-neutral-600">·</span>
             <span className="tabular-nums">{formatVND(TENDER.estimateVND)}</span><span className="text-neutral-600">·</span>
             <span>{TENDER.deadline}</span><span className="text-neutral-600">·</span>
             <span>{TENDER.quorum.required} of {TENDER.quorum.total} signatures</span>
@@ -197,7 +196,6 @@ export default function TenderBoard() {
         {/* Phase stepper */}
         <section className={card}>
           <h2 className="text-base font-semibold tracking-tight text-neutral-100">Tender phase</h2>
-          <Vi>Giai đoạn đấu thầu</Vi>
           <ol className="mt-5 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, idx) => {
               const active = s.n === phase;
@@ -206,25 +204,23 @@ export default function TenderBoard() {
                 <li key={s.n} className="relative">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                        active ? "bg-white" : done ? "bg-emerald-400" : "bg-[#2e2e2e]"
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold !text-white ${
+                        active ? "bg-indigo-600" : done ? "bg-emerald-500" : "bg-slate-200"
                       }`}
-                    />
-                    <span className={`h-px flex-1 ${idx === STEPS.length - 1 ? "bg-transparent" : done ? "bg-emerald-400/40" : "bg-[#1f1f1f]"}`} />
+                    >{s.n}</span>
+                    <span className={`h-px flex-1 ${idx === STEPS.length - 1 ? "bg-transparent" : done ? "bg-emerald-300" : "bg-slate-200"}`} />
                   </div>
                   <div className="mt-2 pr-4">
-                    <span className={`flex items-center gap-1.5 text-sm font-medium ${active ? "text-white" : done ? "text-neutral-300" : "text-neutral-500"}`}>
-                      {done && <FaCheckCircle className="h-3 w-3 text-emerald-400" />}
+                    <span className={`flex items-center gap-1.5 text-sm font-medium ${active ? "text-indigo-700" : done ? "text-slate-700" : "text-neutral-500"}`}>
+                      {done && <FaCheckCircle className="h-3 w-3 text-emerald-500" />}
                       {s.label}
                     </span>
-                    <Vi>{s.vi}</Vi>
-                    
                   </div>
                 </li>
               );
             })}
           </ol>
-          <p className="mt-5 border-t border-[#1f1f1f] pt-4 text-xs text-neutral-500">
+          <p className="mt-5 border-t border-[#eef0f3] pt-4 text-xs text-neutral-500">
             Steps change only by 3/5 committee motion.{" "}
             <Link href="/admin" className="text-neutral-300 underline">Tender Committee</Link>
           </p>
@@ -233,7 +229,6 @@ export default function TenderBoard() {
         {/* Bids table */}
         <section className={card}>
           <h2 className="text-base font-semibold tracking-tight text-neutral-100">Bids</h2>
-          <Vi>Hồ sơ dự thầu</Vi>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
@@ -251,10 +246,7 @@ export default function TenderBoard() {
                     <tr key={r.key} className="border-b border-[#1f1f1f] align-top transition-colors hover:bg-[#141414]">
                       <td className="py-3 pr-4">
                         <div className="font-medium text-neutral-100">{r.v.name}</div>
-                        {r.you && <Vi>{r.v.nameVi}</Vi>}
-                        <span className={chip + " mt-1 " + (r.you ? "bg-[#1a1a1a] text-neutral-200" : "bg-[#1a1a1a] text-neutral-500")}>
-                          {r.you ? "real · TideCloak-encrypted" : "simulated"}
-                        </span>
+                        <div className="mt-1 flex flex-wrap gap-1"><span className="pill pill-seller">Seller</span><span className={chip + " chip-sealed"}>{r.you ? "real · TideCloak-encrypted" : "simulated"}</span></div>
                       </td>
                       <td className="py-3 pr-4">
                         {r.techSealed ? (
@@ -285,7 +277,7 @@ export default function TenderBoard() {
                       </td>
                       <td className="py-3">
                         {isLowest ? (
-                          <span className={chip + " bg-emerald-500/10 text-emerald-400"}>Lowest</span>
+                          <span className={chip + " chip-open"}>Lowest</span>
                         ) : r.priceStatus === "open" ? (
                           <span className="text-neutral-300">Opened</span>
                         ) : r.priceStatus === "none" ? (
@@ -310,16 +302,15 @@ export default function TenderBoard() {
           <div className={card}>
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-base font-semibold tracking-tight text-neutral-100">{pv ? "Access log" : "Who tried to break the rules"}</h2>
-              <span className={chip + " shrink-0 bg-amber-500/10 text-amber-400"}>{pv ? "live · simulated policy" : "illustrative"}</span>
+              <span className={chip + " shrink-0 chip-pending"}>{pv ? "live · simulated policy" : "illustrative"}</span>
             </div>
-            <Vi>{pv ? "Nhật ký truy cập" : "Ai đã thử phá luật"}</Vi>
             {pv ? (
               <ul className="mt-3 max-h-80 divide-y divide-[#1f1f1f] overflow-y-auto text-xs">
                 {pv.accessLog.length === 0 && <li className="py-2 italic text-neutral-500">No checks yet.</li>}
                 {pv.accessLog.map((e, i) => (
                   <li key={i} className="py-2">
-                    <span className={chip + " mr-2 " + (e.result === "ALLOW" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400")}>{e.result}</span>
-                    <span className="font-mono text-neutral-500">{e.t}</span> <span className="font-medium text-neutral-200">{e.persona}</span>{" "}
+                    <span className={chip + " mr-2 " + (e.result === "ALLOW" ? "chip-open" : "chip-denied")}>{e.result}</span>
+                    <span className="font-mono text-neutral-500">{e.t}</span> {SIDE[e.persona] && <span className={"pill mr-1 " + SIDE[e.persona][1]}>{SIDE[e.persona][0]}</span>}<span className="font-medium text-neutral-200">{e.persona}</span>{" "}
                     <span className="font-mono text-neutral-400">{e.action}</span>
                     <div className="mt-1 text-neutral-400">{e.reason}</div>
                     {e.rule && <div className="italic text-neutral-500">rule: {e.rule}</div>}
@@ -331,8 +322,7 @@ export default function TenderBoard() {
               {ATTEMPTS.map((a) => (
                 <li key={a.who} className="py-2.5">
                   <span className="text-neutral-300">{a.who}</span>
-                  <span className="font-medium text-rose-400"> {"->"} {a.result}</span>
-                  <Vi className="text-xs">{a.vi}</Vi>
+                  <span className="font-medium text-rose-700"> {"->"} {a.result}</span>
                 </li>
               ))}
             </ul>
@@ -342,7 +332,6 @@ export default function TenderBoard() {
           {/* Why this can't be rigged */}
           <div className={card}>
             <h2 className="text-base font-semibold tracking-tight text-neutral-100">Why this can't be rigged</h2>
-            <Vi>Vì sao không thể thông thầu</Vi>
             <ul className="mt-3 space-y-3 text-sm text-neutral-400">
               <li className="flex gap-2"><FaKey className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Keys no one holds</strong></span></li>
               <li className="flex gap-2"><FaUsers className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Rules change by 3-of-5 quorum</strong></span></li>
@@ -355,17 +344,16 @@ export default function TenderBoard() {
           <section className={card}>
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold tracking-tight text-neutral-100">AI evaluator</h2>
-              <span className={chip + " bg-amber-500/10 text-amber-400"}>simulated AI</span>
+              <span className={chip + " chip-pending"}>simulated AI</span>
             </div>
-            <Vi>Tác tử AI chấm thầu</Vi>
             <button type="button" onClick={requestPrices} className="btn-gold mt-3">Request bid prices</button>
             {aiResult && !aiResult.allow && (
-              <p className="mt-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+              <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
                 DENY: {aiResult.reason}. <span className="italic">rule: {aiResult.rule}</span>
               </p>
             )}
             {aiResult && aiResult.allow && (
-              <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+              <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                 <p className="font-medium">ALLOW: {aiResult.reason}</p>
                 <p className="mt-1 text-neutral-300">{aiResult.summary}</p>
                 <p className="mt-1 text-xs italic text-neutral-500">Simulated locally; no model called.</p>

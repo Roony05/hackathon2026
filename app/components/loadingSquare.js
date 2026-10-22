@@ -1,14 +1,26 @@
-// app/components/loadingSquare.tsx
+// app/components/loadingSquare.js
 "use client";
 
 import { useEffect } from "react";
 
+// Module-level counter: body stays locked only while at least one loader is mounted.
+let mounted = 0;
+
+export function releaseScrollIfIdle() {
+  if (typeof document === "undefined") return;
+  if (mounted <= 0) {
+    mounted = 0;
+    document.body.classList.remove("no-scroll");
+  }
+}
+
 export function LoadingSquareFullPage() {
-  // Add “no-scroll” to <body> immediately on mount
   useEffect(() => {
+    mounted += 1;
     document.body.classList.add("no-scroll");
     return () => {
-      document.body.classList.remove("no-scroll");
+      mounted = Math.max(0, mounted - 1);
+      if (mounted === 0) document.body.classList.remove("no-scroll");
     };
   }, []);
 

@@ -8,7 +8,7 @@ import Button from "../components/button";
 import { FaCheckCircle, FaChevronRight } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
-import { FIELDS, COMMITTEE, Vi } from "../tenderStory";
+import { FIELDS, COMMITTEE } from "../tenderStory";
 import "../styles/spinKit.css";
 import "../styles/spinner.css";
 
@@ -54,19 +54,19 @@ function DoneCard({ router }) {
 
   if (!ready) {
     return (
-      <div className="bg-white border rounded-2xl p-6 shadow flex items-center gap-3 mt-8">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow flex items-center gap-3 mt-8">
         <div className="spinner--left" />
-        <span className="text-sm text-gray-600">Committing the committee motion…</span>
+        <span className="text-sm text-slate-600">Committing the committee motion…</span>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow space-y-4 mt-8">
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow space-y-4 mt-8">
       <div className="mt-4">
-        <div className="text-sm text-gray-700 flex items-center gap-2">
+        <div className="text-sm text-slate-600 flex items-center gap-2">
           <FaCheckCircle className="text-green-500" />
-          <span>Motion passed by quorum and committed. Check the Tender Board.</span>
+          <span>Motion committed by quorum.</span>
           <a
             href="#"
             onClick={(e) => {
@@ -555,19 +555,19 @@ export default function Admin() {
       };
 
       return (
-        <div className="bg-white border rounded-2xl p-6 shadow space-y-4 mt-8">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow space-y-4 mt-8">
 
         <div className="flex justify-between items-center mt-6">
           {ADMIN_NAMES.map((name, idx) => (
             <div key={idx} className="relative flex flex-col items-center">
               <div
                 className={`w-14 h-14 flex items-center justify-center rounded-full border-4 transition-all duration-700 ease-in-out 
-          ${approvals[idx] ? "border-green-500 shadow-md shadow-green-200" : "border-gray-300"}
+          ${approvals[idx] ? "border-green-500 shadow-md shadow-green-200" : "border-slate-200"}
         `}
               >
-                <span className="font-semibold text-lg text-gray-700">{name[0]}</span>
+                <span className="font-semibold text-lg text-slate-600">{name[0]}</span>
               </div>
-              <span className="text-xs mt-2 text-gray-600 text-center">{name} · {COMMITTEE[idx].role}</span>
+              <span className="text-xs mt-2 text-slate-600 text-center">{name} · {COMMITTEE[idx].role}</span>
 
               {/* Tick overlay – doesn't shift layout */}
               {approvals[idx] && (
@@ -580,13 +580,13 @@ export default function Admin() {
 
         <div className="pt-4">
           { request.deleteStatus === "DRAFT" || request.status === "DRAFT"? (
-            <Button onClick={() => {handleUserApprove(request)}} disabled={pending}>
+            <Button className="rounded-full" onClick={() => {handleUserApprove(request)}} disabled={pending}>
               Review
             </Button>
 
           ) : !pending && (request.deleteStatus === "APPROVED" || request.status === "APPROVED") ? (
             <div className="flex items-center gap-x-2">
-              <Button className="bg-green-600 hover:bg-green-700" onClick={onCommit} disabled={loadingButton}>
+              <Button className="rounded-full bg-emerald-600 text-white hover:bg-emerald-700" onClick={onCommit} disabled={loadingButton}>
                 Commit
               </Button>
               {
@@ -597,7 +597,7 @@ export default function Admin() {
             </div>
             
           ) : (
-            <p className="text-sm text-gray-500 italic">
+            <p className="text-sm text-slate-500 italic">
               Awaiting quorum: <strong>{totalApproved} / 3</strong> signatures
             </p>
           )}
@@ -717,7 +717,7 @@ export default function Admin() {
               {/* Accordion Icon */}
               <button
                 onClick={() => setShowAdminAccordion(prev => !prev)}
-                className="absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"
+                className="rounded-full absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"
                 aria-label="Toggle explanation"
               >
                 {showAdminAccordion ? "🤯" : "🤔"}
@@ -725,15 +725,15 @@ export default function Admin() {
 
               {/* Accordion Content */}
               <AccordionBox
-  title="Why no one can change the tender rules alone"
+  title="Why changes need committee signatures"
   isOpen={showAdminAccordion}
 >
   <ul className="list-disc pl-5 space-y-1">
-    <li><strong>Committee identity.</strong> Each member authenticates through BYOiD and the decentralized Fabric.</li>
-    <li><strong>Ownerless root certificate.</strong> No chair, IT admin or platform operator controls the signing key.</li>
-    <li><strong>Signed rules.</strong> Envelope roles take effect only with the root certificate's endorsement; unsigned database edits grant no access.</li>
-    <li><strong>Committee quorum.</strong> Closing submissions, extending the deadline or opening financial envelopes needs 3 of 5 signatures.</li>
-    <li><strong>Enforced at the API.</strong> Calling an endpoint directly cannot bypass the signing rules.</li>
+    <li>Each committee member authenticates independently.</li>
+    <li>No insider controls the signing key.</li>
+    <li>Unsigned edits grant no access.</li>
+    <li>Changes need 3 of 5 signatures.</li>
+    <li>API calls cannot bypass quorum.</li>
   </ul>
 </AccordionBox>
 
@@ -742,20 +742,19 @@ export default function Admin() {
 
               {!isTideAdmin && (
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-bold mb-4">Tender Committee<Vi>Hội đồng thầu</Vi></h2>
-                  <p className="text-sm text-gray-600 mb-6">Every rule change needs 3 of 5 committee signatures.</p>
+                  <h2 className="text-3xl font-bold mb-4">Tender Committee</h2>
+                  <span className="inline-block rounded-full bg-indigo-50 text-indigo-700 text-xs px-2.5 py-0.5">Buyer · Lotus Industries</span>
+                  <p className="text-sm text-slate-600 mb-6">Rule changes need 3 of 5 committee signatures.</p>
                   {!showExplainer ? (
-                    <Button className="hover:bg-red-700" onClick={handleElevateClick}>Join the committee (demo)</Button>
+                    <Button className="rounded-full bg-indigo-600 text-white hover:bg-indigo-700" onClick={handleElevateClick}>Join the committee (demo)</Button>
                   ) : (
-                    <div className="bg-yellow-50 border border-yellow-300 p-4 rounded space-y-3">
-                      <p className="font-semibold text-yellow-800">Why can I join the committee with a click?</p>
+                    <div className="bg-yellow-50 border border-yellow-300 p-4 rounded-2xl space-y-3">
+                      <p className="font-semibold text-yellow-800">Demo committee access</p>
                       <p className="text-sm text-yellow-900">
-                        This demo shortcut lets you play committee member #1; the other four members are simulated.
-                        In a realm hardened with a quorum, even the platform cannot unilaterally grant committee powers.
-                        <br /><br /><strong>The demo simulates 3-of-5 signatures; you provide the first member's review.</strong>
+                        You sign first; other signatures simulate.
                       </p>
                       <div className="flex items-center gap-x-4">
-                        <Button className="hover:bg-red-700" onClick={confirmAdmin} disabled={loadingButton}>Continue as committee member #1</Button>
+                        <Button className="rounded-full bg-indigo-600 text-white hover:bg-indigo-700" onClick={confirmAdmin} disabled={loadingButton}>Continue as committee member #1</Button>
                         {
                           loadingButton
                           ? <div className="spinner--left"/>
@@ -769,9 +768,10 @@ export default function Admin() {
 
               {isTideAdmin && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl font-bold mb-4">Tender Committee<Vi>Hội đồng thầu</Vi></h2>
-                  <p className="text-sm text-gray-700">
-                    Every rule change needs 3 of 5 committee signatures.
+                  <h2 className="text-3xl font-bold mb-4">Tender Committee</h2>
+                  <span className="inline-block rounded-full bg-indigo-50 text-indigo-700 text-xs px-2.5 py-0.5">Buyer · Lotus Industries</span>
+                  <p className="text-sm text-slate-600">
+                    Rule changes need 3 of 5 committee signatures.
                   </p>
                   <form
                     onSubmit={handleAdminPermissionSubmit}
@@ -779,8 +779,8 @@ export default function Admin() {
                     className="space-y-6"
                   >
                     <div className="border rounded-2xl p-5 bg-white space-y-6">
-                      <h4 className="text-base font-semibold text-gray-800">Motion: Vendor A's envelopes</h4>
-                      <p className="text-sm text-gray-600">Pick a motion, then table it.</p>
+                      <h4 className="text-base font-semibold text-slate-900">Motion: Vendor A's envelopes</h4>
+                      <p className="text-sm text-slate-600">Pick a motion, then table it.</p>
 
                       <div className="grid gap-4 sm:grid-cols-3">
                         <button
@@ -791,12 +791,11 @@ export default function Admin() {
                             setHasCcWritePerm(false);
                             setHasChanges(true);
                           }}
-                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-200 ${!hasDobWritePerm && !hasCcWritePerm ? "!border-[#ededed]" : ""}`}
+                          className={`bg-white border border-slate-200 rounded-2xl h-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-200 ${!hasDobWritePerm && !hasCcWritePerm ? "!border-indigo-500 ring-2 ring-indigo-100" : ""}`}
                         >
-                          <span className="block font-semibold text-gray-800">Close submissions</span>
-                          <Vi>Đóng nhận hồ sơ</Vi>
-                          <span className="mt-3 block text-sm text-gray-600">Freeze both envelopes.</span>
-                          {!hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
+                          <span className="block font-semibold text-slate-900">Close submissions</span>
+                          <span className="mt-3 block text-sm text-slate-600">Freeze both envelopes.</span>
+                          {!hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-indigo-700">Selected</span>}
                         </button>
                         <button
                           type="button"
@@ -807,12 +806,11 @@ export default function Admin() {
                             setHasCcWritePerm(false);
                             setHasChanges(true);
                           }}
-                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-200 ${hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm ? "!border-[#ededed]" : ""}`}
+                          className={`bg-white border border-slate-200 rounded-2xl h-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-200 ${hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm ? "!border-indigo-500 ring-2 ring-indigo-100" : ""}`}
                         >
-                          <span className="block font-semibold text-gray-800">Open financial envelopes</span>
-                          <Vi>Mở túi tài chính</Vi>
-                          <span className="mt-3 block text-sm text-gray-600">Open prices, close bidding.</span>
-                          {hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
+                          <span className="block font-semibold text-slate-900">Open financial envelopes</span>
+                          <span className="mt-3 block text-sm text-slate-600">Open prices, close bidding.</span>
+                          {hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-indigo-700">Selected</span>}
                         </button>
                         <div className="space-y-3">
                           <button
@@ -824,29 +822,28 @@ export default function Admin() {
                               setHasCcWritePerm(true);
                               setHasChanges(true);
                             }}
-                            className={`glass w-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-200 ${hasDobWritePerm && hasCcWritePerm ? "!border-[#ededed]" : ""}`}
+                            className={`bg-white border border-slate-200 rounded-2xl w-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-indigo-200 ${hasDobWritePerm && hasCcWritePerm ? "!border-indigo-500 ring-2 ring-indigo-100" : ""}`}
                           >
-                            <span className="block font-semibold text-gray-800">Extend deadline for Vendor A</span>
-                            <Vi>Gia hạn cho nhà thầu A</Vi>
-                            <span className="mt-3 block text-sm text-gray-600">Let Vendor A edit again.</span>
-                            {hasDobWritePerm && hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
+                            <span className="block font-semibold text-slate-900">Extend deadline</span>
+                            <span className="mt-3 block text-sm text-slate-600">Let Vendor A edit again.</span>
+                            {hasDobWritePerm && hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-indigo-700">Selected</span>}
                           </button>
-                          <p id="extend-deadline-note" className="text-xs text-rose-400">Classic favour; still needs 3 of 5.</p>
+                          <p id="extend-deadline-note" className="text-xs text-slate-500">Requires three committee signatures.</p>
                         </div>
                       </div>
 
-                      <p className="text-sm text-gray-700" aria-live="polite" aria-atomic="true">
+                      <p className="text-sm text-slate-600" aria-live="polite" aria-atomic="true">
                         <span className="font-semibold">Motion preview: </span>
                         {motionPreview.length ? motionPreview.join(" · ") : "No envelope changes."}
                       </p>
 
-                      <details className="glass p-4">
-                        <summary className="cursor-pointer text-sm font-semibold text-gray-700">Advanced: exact role changes (TideCloak <code>_tide_*</code> roles)</summary>
+                      <details className="bg-white border border-slate-200 rounded-2xl p-4">
+                        <summary className="cursor-pointer text-sm font-semibold text-slate-600">Advanced: <code>_tide_*</code> roles</summary>
                         <div className="mt-4 space-y-6">
 
                       {/* Date of Birth */}
                       <div>
-                        <label className="block font-semibold text-sm mb-1">{FIELDS.dob.en}<Vi>{FIELDS.dob.vi}</Vi></label>
+                        <label className="block font-semibold text-sm mb-1">{FIELDS.dob.en}</label>
                         <div className="flex gap-6">
                           <label className="flex items-center gap-2">
                             <input type="checkbox" name="dob.read" checked={hasDobReadPerm} onChange={e => setHasDobReadPerm(e.target.checked)}/>
@@ -861,7 +858,7 @@ export default function Admin() {
 
                       {/* Credit Card Number */}
                       <div>
-                        <label className="block font-semibold text-sm mb-1">{FIELDS.cc.en}<Vi>{FIELDS.cc.vi}</Vi></label>
+                        <label className="block font-semibold text-sm mb-1">{FIELDS.cc.en}</label>
                         <div className="flex gap-6">
                           <label className="flex items-center gap-2">
                             <input type="checkbox" name="cc.read" checked={hasCcReadPerm} onChange={e => setHasCcReadPerm(e.target.checked)}/>
@@ -878,7 +875,7 @@ export default function Admin() {
                     </div>
 
                     <div className="flex items-center gap-x-2">
-                      <Button className="hover:bg-red-700" type="submit" disabled={!hasChanges || loadingOverlay}>Table motion</Button>
+                      <Button className="rounded-full bg-indigo-600 text-white hover:bg-indigo-700" type="submit" disabled={!hasChanges || loadingOverlay}>Table motion</Button>
                       {
                         loadingOverlay
                         ? <div className="spinner--left"/>
@@ -891,11 +888,11 @@ export default function Admin() {
                     <>
                       {/* Sub-heading + info toggle */}
                       <div className="relative mb-2">
-                        <h3 className="text-xl font-semibold">Motions awaiting signatures<Vi>Đề xuất chờ ký</Vi></h3>
-                        <p className="text-sm text-gray-700">Sign as member #1; commit at 3 of 5.</p>
+                        <h3 className="text-xl font-semibold">Motions awaiting signatures</h3>
+                        <p className="text-sm text-slate-600">You sign first; three signatures commit.</p>
                         <button
                           onClick={() => setShowChangeInfo(prev => !prev)}
-                          className="absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"
+                          className="rounded-full absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"
                           aria-label="Toggle motion explanation"
                         >
                           {showChangeInfo ? "🤯" : "🤔"}
@@ -904,18 +901,17 @@ export default function Admin() {
 
                       {showChangeInfo && (
                         <AccordionBox
-  title="How a committee motion becomes the tender rules"
+  title="How motions become rules"
   isOpen
 >
   <ul className="list-disc pl-5 space-y-1">
-    <li><strong>Draft motion.</strong> Table the proposed envelope rules; the Fabric locks the motion until 3 of 5 committee members sign.</li>
-    <li><strong>Ownerless key signs.</strong> Only after quorum does the ownerless root key sign the new rules in the updated JWT template.</li>
-    <li><strong>No backdoor commit.</strong> Neither the chair nor an IT admin can bypass quorum with a direct API call.</li>
-    <li><strong>Tamper-evident audit trail.</strong> Every signature and commit is hashed and stored, making later changes detectable.</li>
+    <li>Table a motion for committee signatures.</li>
+    <li>Three signatures authorize the new rules.</li>
+    <li>No insider can bypass quorum.</li>
+    <li>Every signature leaves an audit trail.</li>
   </ul>
-  <p className="text-sm text-gray-600 mt-2">
-    Click <em>Review</em> to sign as committee member #1, then watch the simulated members light up
-    before the <strong>Commit</strong> button appears.
+  <p className="text-sm text-slate-600 mt-2">
+    <em>Review</em>, sign, then <strong>Commit</strong> after quorum.
   </p>
 </AccordionBox>
                       )}
@@ -931,8 +927,8 @@ export default function Admin() {
                               key={idx}
                               onClick={() => setExpandedIndex(idx)}
                               className={`
-      cursor-pointer border rounded p-3
-      ${isActive ? "border-l-4 border-red-500 bg-blue-50" : "border-gray-200 bg-white"}
+      cursor-pointer border rounded-2xl p-3
+      ${isActive ? "!border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50" : "border-slate-200 bg-white"}
       transition-colors
     `}
                             >
@@ -960,7 +956,7 @@ export default function Admin() {
                                   ?
                                   <span className={`
                                     px-2 py-1 rounded-full text-xs
-                                    ${req.deleteStatus === "DRAFT" ? "bg-gray-200 text-gray-800" :
+                                    ${req.deleteStatus === "DRAFT" ? "bg-slate-100 text-slate-900" :
                                         req.deleteStatus === "APPROVED" ? "bg-green-100 text-green-800" :
                                           "bg-blue-100 text-blue-800"}
                                   `}>
@@ -969,7 +965,7 @@ export default function Admin() {
                                   :
                                   <span className={`
                                     px-2 py-1 rounded-full text-xs
-                                    ${req.status === "DRAFT" ? "bg-gray-200 text-gray-800" :
+                                    ${req.status === "DRAFT" ? "bg-slate-100 text-slate-900" :
                                         req.status === "APPROVED" ? "bg-green-100 text-green-800" :
                                           "bg-blue-100 text-blue-800"}
                                   `}>
@@ -987,7 +983,7 @@ export default function Admin() {
                                       onCommit={async () => await addCommit(req)}
                                     />
                                   </div>
-                                  : <pre className="mt-2 bg-gray-50 border text-sm rounded p-4 overflow-auto">
+                                  : <pre className="mt-2 bg-slate-50 border text-sm rounded-2xl p-4 overflow-auto">
                                     {req.userRecord[0].accessDraft}
                                   </pre>
                               )}

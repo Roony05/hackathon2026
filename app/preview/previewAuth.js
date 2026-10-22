@@ -359,12 +359,12 @@ function PreviewBanner() {
       <div
         style={{
           position: "fixed", top: 0, left: 0, right: 0, height: BANNER_HEIGHT, zIndex: 100000,
-          boxSizing: "border-box", padding: "0 12px", background: "#111", borderBottom: "1px solid #1f1f1f",
-          color: "#a1a1a1", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          boxSizing: "border-box", padding: "0 12px", background: "#fffbeb", borderBottom: "1px solid #fde68a",
+          color: "#b45309", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
         }}
       >
         <span style={{ width: 6, height: 6, borderRadius: 999, background: "#fbbf24", flexShrink: 0 }} />
-        <span>Simulated TideCloak · Mô phỏng TideCloak</span>
+        <span>Simulated TideCloak — sign-in, roles and checks are simulated</span>
       </div>
       <div style={{ height: BANNER_HEIGHT, flexShrink: 0 }} aria-hidden="true" />
     </>
@@ -569,31 +569,36 @@ export function PreviewLanding() {
     setPersonaCookie(id);
     window.location.href = "/home";
   };
+  const Row = ({ id, name, line }) => (
+    <button key={id} type="button" onClick={() => pick(id)} className="block w-full rounded-xl border border-[#e6e8ec] bg-white p-3 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[#d5d9e0] hover:shadow-[0_8px_24px_rgba(16,24,40,.08)] motion-reduce:transform-none">
+      <div className="text-sm font-medium text-slate-900">{name}</div>
+      <div className="text-xs text-slate-500">{line}</div>
+    </button>
+  );
+  const Group = ({ pill, tag, title, children }) => (
+    <section className="space-y-2">
+      <div className="flex items-center gap-2"><span className={"pill " + pill}>{tag}</span><span className="text-xs text-slate-500">{title}</span></div>
+      {children}
+    </section>
+  );
   return (
     <main className="flex-grow w-full px-4 py-12">
-      <div className="mx-auto w-full max-w-md space-y-4 rounded-2xl border border-[#1f1f1f] bg-[#111] p-5 shadow-[0_1px_2px_rgba(0,0,0,.4)]">
+      <div className="mx-auto w-full max-w-md space-y-5 rounded-2xl border border-[#e6e8ec] bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,.06)]">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold tracking-tight text-neutral-100">Sign in with Tide</h2>
-          <span className="rounded-full border border-[#2e2e2e] px-2.5 py-0.5 text-xs text-neutral-400">simulated</span>
+          <h2 className="text-lg font-semibold tracking-tight text-slate-900">Sign in with Tide</h2>
+          <span className="pill chip-pending">simulated</span>
         </div>
-        <p className="text-xs italic text-neutral-500">Đăng nhập bằng Tide</p>
-        <p className="text-sm text-neutral-400">
-          Pick a persona to continue.
-        </p>
-        <div className="space-y-2">
-          {Object.values(PERSONAS).map((p) => (
-            <button key={p.id} type="button" onClick={() => pick(p.id)} className="block w-full rounded-xl border border-[#1f1f1f] bg-[#0a0a0a] p-3 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[#3a3a3a] hover:bg-[#101010] motion-reduce:transform-none">
-              <div className="text-sm font-medium text-neutral-100">{p.label}</div>
-              <div className="text-xs italic text-neutral-500">{p.vi}</div>
-              <div className="mt-1 text-xs text-neutral-400">{p.blurb}</div>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {p.realmRoles.map((r) => (
-                  <span key={r} className="rounded-full bg-[#1a1a1a] px-2 py-0.5 font-mono text-[11px] text-neutral-400">{r}</span>
-                ))}
-              </div>
-            </button>
-          ))}
-        </div>
+        <Group pill="pill-buyer" tag="Buyer" title="Lotus Industries (procuring entity)">
+          <Row id="procurement" name="Procurement head" line="Runs the tender, needs 3/5 to act" />
+          <Row id="ai" name="AI evaluator" line="Ranks bids after opening" />
+        </Group>
+        <Group pill="pill-seller" tag="Sellers" title="bidders">
+          <Row id="vendor" name="Vendor A (you)" line="Submits a sealed bid" />
+          <div className="rounded-xl border border-dashed border-[#e6e8ec] bg-slate-50 p-3 text-sm text-slate-400">Vendors B–E · simulated</div>
+        </Group>
+        <Group pill="pill-platform" tag="Platform" title="Sealed Tender operator">
+          <Row id="itadmin" name="IT admin / DBA" line="Runs the servers, sees only ciphertext" />
+        </Group>
         <button
           type="button"
           disabled={clearing}
