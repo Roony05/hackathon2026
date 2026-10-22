@@ -37,6 +37,8 @@ export default function Nav() {
   const pv = auth.preview;
   const showUser = !pv || pv.persona === "vendor";
   const showAdmin = !pv || pv.persona === "procurement";
+  const showTender = !pv || pv.persona !== "itadmin";
+  const showInsider = !pv || pv.persona === "itadmin";
 
   return (
     <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE !== "0" ? 32 : 0 }} className="sticky z-40 flex h-14 flex-wrap items-center gap-1 border-b border-slate-200 bg-white px-6">
@@ -46,6 +48,7 @@ export default function Nav() {
         <span className="cursor-pointer text-sm font-semibold tracking-tight text-slate-900">Sealed Tender</span>
       </Link>
 
+      {showTender && (
       <button
         onClick={() => handleNavigate("/tender")}
         disabled={backgroundProcessing}
@@ -55,6 +58,7 @@ export default function Nav() {
       >
         Tender Board
       </button>
+      )}
 
       {showUser && (
       <button
@@ -68,6 +72,7 @@ export default function Nav() {
       </button>
       )}
 
+      {showInsider && (
       <button
         onClick={() => handleNavigate("/databaseExposure")}
         disabled={backgroundProcessing}
@@ -77,6 +82,7 @@ export default function Nav() {
       >
         Insider View
       </button>
+      )}
 
       {showAdmin && (
       <button

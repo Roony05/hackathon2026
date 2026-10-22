@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaClipboardList, FaLock, FaDatabase, FaUsers, FaBuilding, FaStore, FaServer } from "react-icons/fa";
 import { useAuth } from "../context/AuthProvider";
+import { canOpen } from "../tenderStory";
 
 const WHO = [
   { pill: "pill-buyer", tag: "Buyer", name: "Lotus Industries", sub: "Posts the tender. Committee opens bids at 3/5.", icon: FaBuilding, tone: "bg-indigo-50 text-indigo-600" },
@@ -43,8 +44,9 @@ export default function HomePage() {
         </h1>
         <p className="mt-3 text-base text-slate-600">No single insider can peek at bids or move deadlines.</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/tender" className="btn-gold">Tender Board</Link>
-          <Link href="/user" className="btn-ghost">My Sealed Bid</Link>
+          {demos.filter(({ href }) => canOpen(auth.preview?.persona, href)).map(({ title, href }, i) => (
+            <Link key={href} href={href} className={i === 0 ? "btn-gold" : "btn-ghost"}>{title}</Link>
+          ))}
         </div>
       </section>
 
@@ -76,7 +78,7 @@ export default function HomePage() {
 
       {/* Destinations */}
       <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {demos.map(({ title, sub, href, icon: Icon }) => (
+        {demos.filter(({ href }) => canOpen(auth.preview?.persona, href)).map(({ title, sub, href, icon: Icon }) => (
           <Link
             key={href}
             href={href}

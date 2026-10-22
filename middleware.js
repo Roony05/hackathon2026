@@ -25,6 +25,12 @@ export async function middleware(req) {
     if (p.startsWith("/user") && persona !== "vendor") {
       return NextResponse.redirect(new URL("/home?denied=user", req.url));
     }
+    if (p.startsWith("/databaseExposure") && persona !== "itadmin") {
+      return NextResponse.redirect(new URL("/home?denied=databaseExposure", req.url));
+    }
+    if (p.startsWith("/tender") && persona === "itadmin") {
+      return NextResponse.redirect(new URL("/home?denied=tender", req.url));
+    }
     return NextResponse.next();
   }
 

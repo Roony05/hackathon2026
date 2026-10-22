@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FaLock, FaCheckCircle, FaShieldAlt, FaKey, FaUsers, FaMicrochip } from "react-icons/fa";
 import { useAuth } from "../context/AuthProvider";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
-import { TENDER, VENDORS, formatVND } from "../tenderStory";
+import { TENDER, VENDORS, formatVND, canOpen } from "../tenderStory";
 
 const STEPS = [
   { n: 1, label: "Bidding open", },
@@ -364,15 +364,21 @@ export default function TenderBoard() {
 
         {/* Navigation buttons */}
         <div className="flex flex-wrap gap-3">
-          <Link href="/user" className="btn-ghost">
-            <FaLock /> My Sealed Bid
-          </Link>
-          <Link href="/databaseExposure" className="btn-ghost">
-            <FaShieldAlt /> Insider View
-          </Link>
-          <Link href="/admin" className="btn-ghost">
-            <FaUsers /> Tender Committee
-          </Link>
+          {canOpen(pv?.persona, "/user") && (
+            <Link href="/user" className="btn-ghost">
+              <FaLock /> My Sealed Bid
+            </Link>
+          )}
+          {canOpen(pv?.persona, "/databaseExposure") && (
+            <Link href="/databaseExposure" className="btn-ghost">
+              <FaShieldAlt /> Insider View
+            </Link>
+          )}
+          {canOpen(pv?.persona, "/admin") && (
+            <Link href="/admin" className="btn-ghost">
+              <FaUsers /> Tender Committee
+            </Link>
+          )}
         </div>
 
         <p className="text-xs text-neutral-500">

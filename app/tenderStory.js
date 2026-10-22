@@ -60,3 +60,12 @@ export const formatVND = (value) => {
 export function Vi() {
   return null;
 }
+
+// Simulated mode: the pages each persona may open (mirrors the route check in middleware.js).
+export const PERSONA_PAGES = {
+  vendor: ["/tender", "/user"],
+  procurement: ["/tender", "/admin"],
+  itadmin: ["/databaseExposure"],
+  ai: ["/tender"],
+};
+export const canOpen = (persona, href) => !persona || (PERSONA_PAGES[persona] || []).includes(href);
