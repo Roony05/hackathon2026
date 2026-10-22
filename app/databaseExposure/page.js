@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthProvider";
 import appService from "../../lib/appService";
 import AccordionBox from "../components/accordionBox";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
+import { FIELDS, VENDORS, Vi } from "../tenderStory";
 import '../styles/spinKit.css';
 import "../styles/spinner.css";
 
@@ -134,19 +135,19 @@ function DecryptedRow({ isUser, user, username, dob, cc, auth }) {
     return (
     <div className="border border-gray-300 rounded p-4 bg-white shadow-sm space-y-2">
         <div className="text-sm font-mono break-all">
-            <strong className="block text-gray-600 text-xs uppercase mb-1">Username</strong>
-            {username}
+            <strong className="block text-gray-600 text-xs uppercase mb-1">Vendor</strong>
+            {VENDORS[username]?.name ?? username}
         </div>
 
         <div className="text-sm font-mono break-all">
-            <strong className="block text-gray-600 text-xs uppercase mb-1">Date of Birth</strong>
+            <strong className="block text-gray-600 text-xs uppercase mb-1">{FIELDS.dob.short}</strong>
             <span className={`inline-block transition-opacity duration-500 ${animating ? "opacity-0" : "opacity-100"}`}>
             {isUser && decrypted && dob && canReadDob? <DecryptingText text={decryptedDob} /> : dob}
             </span>
         </div>
 
         <div className="text-sm font-mono break-all">
-            <strong className="block text-gray-600 text-xs uppercase mb-1">Credit Card</strong>
+            <strong className="block text-gray-600 text-xs uppercase mb-1">{FIELDS.cc.short}</strong>
             <span className={`inline-block transition-opacity duration-500 ${animating ? "opacity-0" : "opacity-100"}`}>
             {isUser && decrypted && cc && canReadCc? <DecryptingText text={decryptedCc} /> : cc}
             </span>
@@ -235,58 +236,38 @@ export default function DatabaseExposure() {
     {showExposureAccordion ? "🤯" : "🤔"}
   </button>
 
-  <h3 className="text-2xl font-semibold">Database-Leak Drill</h3>
+  <h3 className="text-2xl font-semibold">Insider View<Vi>Góc nhìn người trong cuộc</Vi></h3>
 
     <p className="text-sm text-gray-600 mb-3">
-  Your user API&nbsp;
-  <a href="https://techcrunch.com/2025/03/31/api-testing-firm-apisec-exposed-customer-data-during-security-lapse/"
-     target="_blank" rel="noopener noreferrer"
-     className="underline text-blue-600">
-    just leaked
-  </a>&nbsp;, S3 bucket&nbsp;
-  <a href="https://cybersecuritynews.com/86000-healthcare-staff-records-exposed/"
-     target="_blank" rel="noopener noreferrer"
-     className="underline text-blue-600">
-    left public
-  </a>&nbsp;, a dev laptop&nbsp; 
-  <a href="https://www.theverge.com/2023/2/28/23618353/lastpass-security-breach-disclosure-password-vault-encryption-update"
-     target="_blank" rel="noopener noreferrer"
-     className="underline text-blue-600">
-    stolen
-  </a>&nbsp;, even your IAM vendor&nbsp;
-  <a href="https://www.informationweek.com/cyber-resilience/massive-okta-breach-what-cisos-should-know"
-     target="_blank" rel="noopener noreferrer"
-     className="underline text-blue-600">
-    breached
-  </a>.  
-  Normally you'd panic. Not anymore.
+  You are the procurement head (or the DBA, or a hacker holding a DB dump) the night before bid opening - try to read the bids. The database gives you ciphertext only.
 </p>
+<p className="text-sm text-gray-600 mb-3">The Decrypt button uses your logged-in Vendor A session: it can open only your own envelopes with a Read role. A DB dump grants no such access, and your financial envelope stays sealed until the committee opens it.</p>
 
 <AccordionBox
   title="Why an exposed database is still unreadable"
   isOpen={showExposureAccordion}
 >
     <p className="text-sm text-gray-600 mb-3">
-    Data only decrypts for the user who just logged in on <em>this</em> device. Here's the chain that makes that guarantee:
+    A database dump cannot open a sealed bid. Decryption requires the vendor's authenticated session on <em>this</em> device and the matching Read role:
   </p>
   <ul className="list-disc pl-5 space-y-1">
     <li>
-      <strong>Authentication can't be faked.</strong> BYOiD authenticates against a decentralized Fabric - it can't be circumvented, brute forced or faked - so "logged-in" really means logged-in.
+      <strong>Authenticated vendor identity.</strong> BYOiD authenticates against the decentralized Fabric. Holding the procurement database does not let an insider impersonate a vendor.
     </li>
     <li>
-      <strong>User-Device-Session binding.</strong> After BYOiD login, the browser holds a short-lived session key that ties the JWT to the device and session. Steal rows or even the JWT itself, and you still lack that key which makes the decryption process usable.
-    </li>
-
-    <li>
-      <strong>Ownerless root cert.</strong> The Fabric signs tokens with a certificate no one controls; it adds the decrypt claim only if the user truly owns that role.
+      <strong>User, device and session binding.</strong> After BYOiD login, the browser holds a short-lived session key tying the JWT to that device and session. Stolen bid rows or even a stolen JWT lack the key needed for decryption.
     </li>
 
     <li>
-      <strong>Quorum-gated roles.</strong> Widening access demands multi-admin approval, enforced by the same root key, so no lone insider can mint a “read-all” token.
+      <strong>Ownerless root certificate.</strong> The Fabric signs tokens with a certificate no procurement head, DBA or platform operator controls. A decrypt claim appears only for a vendor holding the matching Read role.
     </li>
 
     <li>
-      <strong>Row-level blast radius.</strong> Even a legit user sees only their own data; a full dump collapses to one user, one device, one session.
+      <strong>Committee quorum.</strong> Opening financial envelopes requires 3 of 5 committee signatures, enforced by the same root key. No lone insider can mint a token that reads every bid.
+    </li>
+
+    <li>
+      <strong>Access stays with each vendor.</strong> Even an authorized vendor can decrypt only their own permitted envelopes, on their device and session. Other vendors' bids remain ciphertext.
     </li>
   </ul>
 </AccordionBox>

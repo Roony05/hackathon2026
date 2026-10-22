@@ -6,7 +6,8 @@ import { verifyTideCloakToken } from './lib/tideJWT';
 const routesRoles = [
   { URLStart: "/user", role: 'offline_access' },
   { URLStart: "/admin", role: 'offline_access' },
-  { URLStart: "/databaseExposure", role: 'offline_access' }
+  { URLStart: "/databaseExposure", role: 'offline_access' },
+  { URLStart: "/tender", role: 'offline_access' }
 ];
 
 export async function middleware(req) {
@@ -54,5 +55,5 @@ export async function middleware(req) {
 
 //Which routes the middleware should run on:
 export const config = {
-  matcher: ["/home/:path*", "/user/:path*", "/admin/:path*", "/databaseExposure/:path*"]
+  matcher: ["/home/:path*", "/user/:path*", "/admin/:path*", "/databaseExposure/:path*", "/tender/:path*"]
 };

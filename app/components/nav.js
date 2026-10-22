@@ -30,12 +30,18 @@ export default function Nav() {
     <nav className="flex items-center gap-4 border-b border-gray-200 px-8 py-4">
       {/* Logo → home page */}
       <Link href="/home" className="inline-block">
-        <img
-          src="/playground-logo_nav.png"
-          alt="Playground Logo"
-          className="h-10 w-auto cursor-pointer"
-        />
+        <span className="text-xl font-bold text-gray-800 cursor-pointer">🔒 Sealed Tender</span>
       </Link>
+
+      <button
+        onClick={() => handleNavigate("/tender")}
+        disabled={backgroundProcessing}
+        className={`px-4 py-2 rounded transition ${getButtonClasses("/tender")} ${
+          backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+      >
+        Tender Board
+      </button>
 
       <button
         onClick={() => handleNavigate("/user")}
@@ -44,7 +50,7 @@ export default function Nav() {
           backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
-        User
+        My Sealed Bid
       </button>
 
       <button
@@ -54,7 +60,7 @@ export default function Nav() {
           backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
-        Database Exposure
+        Insider View
       </button>
 
       <button
@@ -64,7 +70,7 @@ export default function Nav() {
           backgroundProcessing ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
-        Administration
+        Tender Committee
       </button>
 
       <Button onClick={() => auth.logout()}>Logout</Button>

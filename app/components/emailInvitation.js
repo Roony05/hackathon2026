@@ -28,10 +28,10 @@ export default function EmailInvitation({ inviteLink }) {
 </div>
 <AccordionBox title="Link what now?" isOpen={showAccordion}>
   <ul className="list-disc pl-5 space-y-1 mt-2">
-  <li>TideCloak can be configured for users to "self register" or be "invite only". This demo is setup as invite only as we've preconfigured a special experience just for you!</li>
-              <li>This page simulates an invite you might receive from a service, HR or administrators. But with a twist that changes everything...</li>
-              <li>While TideCloak holds a user record of you, it <b>only knows you as an anonymous identifier</b>.</li>
-                <li>Your credentials are never seen to TideCloak or anyone for that matter!</li>
+  <li>TideCloak can be configured for users to "self register" or be "invite only". This tender portal is invite only: only invited vendors can bid.</li>
+              <li>This page simulates the invitation to bid a vendor might receive from a buyer. But with a twist that changes everything...</li>
+              <li>While TideCloak holds a user record of you, it <b>only knows you as an anonymous identifier</b>, and your credentials never touch the buyer's systems.</li>
+                <li>Your credentials are never seen by TideCloak or anyone else, including the buyer!</li>
               </ul>
 </AccordionBox>
 
@@ -50,13 +50,13 @@ export default function EmailInvitation({ inviteLink }) {
         {/* Body */}
         <div className="px-6 py-4 space-y-4">
           <div className="text-sm text-gray-500 font-semibold">Subject</div>
-          <div className="font-bold text-lg">Invitation to Play App</div>
+          <div className="font-bold text-lg">Invitation to Bid - RFQ LT-2026-117</div>
 
           <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-            <p>Dear Human,<br />&nbsp;</p>
-            <p>You've been invited to connect as the <strong><i>demo user</i></strong> for the Play app.<br />&nbsp;</p>
+            <p>Dear Bidder,<br />&nbsp;</p>
+            <p>Lotus Industries JSC (fictional) invites you to bid on RFQ LT-2026-117 as <strong><i>Vendor A</i></strong>.<br />&nbsp;</p>
             <p>Create or link your Tide account by clicking <strong><i>Accept</i></strong> below and following the prompts.<br />&nbsp;</p>
-            <p>A Tide account allows you to login to any service with guaranteed privacy and ownership of your identity.</p>
+            <p>A Tide account lets you submit sealed bids with guaranteed privacy and ownership of your identity.</p>
           </div>
 
           <div>
@@ -67,7 +67,7 @@ export default function EmailInvitation({ inviteLink }) {
               Accept
             </button>
                         <p className="text-sm italic text-gray-600 mt-3">
-              Once you're done you'll be redirected to the Play app.
+              Once you're done you'll be redirected to the tender portal.
             </p>
           </div>
         </div>

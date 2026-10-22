@@ -1,74 +1,62 @@
-![play_github_heading](https://github.com/user-attachments/assets/14e76359-799e-4fc6-8c53-d00c8c174e87)
+# 🔒 Sealed Tender
 
-# TideCloak developer capability playground
+## Project overview
 
-Open this Codespace to see what building **without breach anxiety** feels like. TideCloak is an Identity & Access Management system that locks your platform's data, identities and access rights with keys no-one will ever hold - Not admins, vendors, users, or even us.
+**Sealed Tender is a two-envelope procurement portal where bids stay sealed until a tender-committee quorum opens them: no procurement head, IT admin, platform operator or AI agent can peek early or bend the rules alone.**
 
-TideCloak layers its decentralized Cybersecurity Fabric on top of [Keycloak](https://www.keycloak.org/) (Red Hat's battle-tested open-source IAM), so you keep the standard OpenID/OAuth toolkit while gaining verifiable immunity to credential theft, mis-configuration, insider abuse, and attacks we don't even see coming yet.
+**Vision & originality**
+Tendering runs on the sealed envelope, but e-procurement broke that promise: whoever runs the database holds every envelope. Sealed Tender restores it. Bids are encrypted in the vendor's browser, and tender rules (deadline, who may open what) change only when a committee quorum signs.
 
-The playground sandbox spins up in one click on GitHub Codespaces and guides you through the model with interactive demos.
+**Trust constraint insight**
+Bid rigging rarely needs hacking. One insider reads rivals' prices and tips off a favoured vendor, or quietly extends the deadline. Such collusion was central to Vietnam's AIC and Việt Á procurement scandals. With ordinary login and backend permissions, the DBA or procurement head can do both.
 
----
+**Value & impact**
+Buyers get real competition and lower prices, honest vendors win on merit, and auditors get signed evidence. Example: Lotus Industries is buying 40 CNC machines (estimate ₫15bn). A vendor tipped off about a ₫12.45bn rival bid undercuts it by 1% and wins. Here, it stays ciphertext until 3 of 5 committee members sign.
 
-## 🚀 Quick Start (with GitHub Codespaces)
+**Why TideCloak matters**
+- Envelopes are encrypted at the edge with TideCloak tags. Decryption needs a role in a Fabric-signed token, so the database, server and AI agents hold only ciphertext.
+- Opening envelopes or re-accepting submissions is a role change that needs 3-of-5 quorum, with no backdoor commit.
+- Without TideCloak, the server holds the keys and its admin becomes the new trusted party.
 
-Launch a preconfigured development environment directly in your browser:
-
-[![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://codespace.new/tide-foundation/tidecloak-playground?quickstart=1)
-
-**While you wait (5 mins or so), here's what happens automatically:**
-
-- Installs required dependencies (`libssl-dev`)
-- Auto-updates config files with your Codespace URLs
-- Installs `npm` packages
-- Starts the TideCloak backend in Docker
-- Launches the frontend dev server (Playground App)
-
-Feel free to grab a coffee, star this project, or read about the latest breach headlines, that won't bother you when you're TideCloaked.
-
-### ▶️ **Have a play**
-
-The initialization screen opens automatically. Once initialization is complete your experience will begin.
-
-|                                   Initialization: Set's up your experience                                   |                                      Invite: You're ready to go                                      |
-| :-----------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------: |
-| ![play_github_heading](https://github.com/RaymondThach/tidecloak-playground/blob/main/public/init.gif?raw=true) | ![play_github_heading](https://github.com/user-attachments/assets/fe25f509-297e-4384-91dd-94f017de34bf) |
-
-If the page doesn't open check the **Ports tab** in Codespaces for the **Forwarded address**:
-
-- `https://${CODESPACE_NAME}-3000.app.github.dev` → ✅ **Playground App**
-- `https://${CODESPACE_NAME}-8000.app.github.dev` → 🔐 **TideCloak IAM**
-
-### **Accessing the TideCloak backend**
+**Prototype & storytelling**
+Vendor A seals a price nobody can reopen, not even Vendor A. The Insider View shows a leaked database as ciphertext. The committee tables a motion that takes effect only at 3/5 signatures. The Tender Board then opens envelopes and ranks bids.
 
 ---
 
-In the **Ports tab** click on the **Forwarded addess** in the format of `https://${CODESPACE_NAME}-8000.app.github.dev`. The default administrator credentials are `admin` / `password`.
+## 🎬 Demo video
 
-> [!NOTE]
-> For the first visit, you'll see a Github warning like [this](https://raw.githubusercontent.com/tide-foundation/tidecloakspaces/main/image/README/1743562446996.png). Just press `Continue` to move on.
+[demo.mp4](./demo.mp4) — 2 minutes.
 
-## 🤝 Contributing
+## What is real and what is simulated
 
-We welcome contributions! To get started:
+| Part | Status |
+|---|---|
+| BYOiD login (Tide account) | Real TideCloak |
+| Vendor A's technical and financial envelopes, encrypted and decrypted in the browser | Real TideCloak (tags `dob` = technical envelope, `cc` = financial envelope) |
+| Committee motions: draft, sign, commit, which change Vendor A's read/write roles | Real TideCloak governance. You sign as member #1; members 2–5 are simulated, as in the TideCloak playground |
+| Vendors B–E, their prices, and the "who tried to break the rules" panel | Simulated (synthetic data) |
 
-1. Fork the repo
-2. Open in a Codespace
-3. Make your changes
-4. Submit a pull request
+## Pages
 
-Please follow conventional commit standards and include relevant documentation if needed.
+- **Tender Board** (`/tender`): tender phases, the bids table, and the ranking once financial envelopes are opened.
+- **My Sealed Bid** (`/user`): Vendor A submits the technical envelope and seals the financial envelope.
+- **Insider View** (`/databaseExposure`): what a procurement head, DBA or hacker with a database dump sees.
+- **Tender Committee** (`/admin`): motions to close submissions or open envelopes, which need 3 of 5 signatures.
 
----
+## Setup (GitHub Codespaces, about 5 minutes)
 
-## 📄 License
+1. Open this repository in Codespaces: **Code → Codespaces → Create codespace on main**.
+2. Wait for the automatic setup. It installs `libssl-dev`, rewrites the config files with your Codespace URLs, runs `npm install`, starts TideCloak in Docker and runs the Next.js dev server.
+3. The app opens on port **3000**, and TideCloak runs on port **8080** (admin console login `admin` / `password`). If the page says the TideCloak port is private, open the **Ports** tab, right-click port 8080 and set it to Public.
+4. Accept the "Invitation to Bid" email mock-up, then create or link a Tide account and log in.
+5. Suggested path: **My Sealed Bid** (seal a price) → **Insider View** → **Tender Committee** (join, untick *Accept submissions* and tick *Open* on the financial envelope, table the motion, review, sign, commit) → **Tender Board**.
 
-This project is licensed under the [MIT License]().
+To start again from a clean realm, run `bash reset-and-restart.sh` and restart the dev server.
 
----
+## Tóm tắt tiếng Việt
 
-## 📚 Resources
+**Sealed Tender** là cổng đấu thầu "hai túi hồ sơ": giá dự thầu được mã hoá ngay trên trình duyệt của nhà thầu. Trưởng phòng mua sắm, IT admin, đơn vị vận hành nền tảng hay AI đều chỉ thấy chuỗi mã hoá. Mọi thay đổi luật thầu (đóng thầu, gia hạn, mở túi tài chính) phải được 3/5 thành viên hội đồng ký duyệt qua TideCloak, nên không một cá nhân nào có thể "thông thầu" một mình.
 
-* [Tide Foundation](https://tide.org/)
-* [Reimagining Cybersecurity for Devs](https://tide.org/blog/rethinking-cybersecurity-for-developers)
-* [TideCloak Documentation](https://docs.tidecloak.com)
+## Credits
+
+Built on the [TideCloak developer playground](https://github.com/tide-foundation/tidecloak-playground) by Tide Foundation for RMIT Hackathon 2026 (Challenge 2 · UNLOCKED). All companies, people and bids in the demo are fictional.

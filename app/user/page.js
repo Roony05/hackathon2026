@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import AccordionBox from "../components/accordionBox";
 import Button from "../components/button";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
+import { TENDER, FIELDS, Vi } from "../tenderStory";
 import "../styles/spinKit.css";
 import "../styles/spinner.css";
 
@@ -296,7 +297,7 @@ export default function User(){
 
             // Show the confirmation message
             if (response.ok){
-                setUserFeedback("Changes saved!");
+                setUserFeedback("Sealed! Encrypted in your browser before it left.");
                 setTimeout(() => setUserFeedback(""), 3000); // Clear after 3 seconds
                 getAllUsers();
             }
@@ -335,34 +336,28 @@ export default function User(){
                 </button>
 
                 {/* Accordion content */}
-                <AccordionBox title="Why user data stays private" isOpen={showUserInfoAccordion}>
-  <p>
-    TideCloak turns privacy from policy paperwork into math you - and your users - can verify.
-  </p>
-
+                <AccordionBox title="Why no one can peek at your bid" isOpen={showUserInfoAccordion}>
   <ul className="list-disc pl-5 space-y-1 mt-2">
     <li>
-      <strong>User-sealed data.</strong> BYOiD proves the requester's identity, and the Cybersecurity Fabric answers only to that user, so servers, DBAs, and even root accounts see ciphertext.
+      <strong>No insider preview.</strong> The procurement head, DBA, platform operator and any AI agent see only ciphertext in the database.
     </li>
     <li>
-      <strong>Edge-only decryption.</strong> Multi-party computation returns puzzle pieces that can be assembled only with the short-lived session key in this browser; the Fabric itself never sees plaintext.
+      <strong>Decryption at the edge.</strong> Only the role holder can decrypt in their browser session; the Fabric never sees the bid plaintext.
     </li>
     <li>
-      <strong>Privilege without peeking.</strong> Admins can grant or revoke roles, but the Fabric refuses to decrypt on their behalf.
+      <strong>Committee quorum.</strong> Changing envelope access needs 3 of 5 committee signatures, including opening the financial envelopes.
     </li>
     <li>
-      <strong>Policy = code.</strong> The read/write flags you toggle compile into Fabric-signed JWTs that can't be forged or escalated.
+      <strong>Signed and auditable.</strong> Every change to the tender rules is signed and recorded in a tamper-evident audit trail.
     </li>
   </ul>
 
-  <p className="mt-2">
-    Change a field, hit <em>Save</em>, and watch the Fabric re-encrypt on the fly.
-  </p>
 </AccordionBox>
 
 
 
-                <h2 className="text-3xl font-bold mb-4">User Information</h2>
+                <h2 className="text-3xl font-bold mb-4">My Sealed Bid<Vi>Hồ sơ dự thầu niêm phong của tôi</Vi></h2>
+                <p className="text-sm text-gray-600">{TENDER.id} · {TENDER.title} · {TENDER.buyer}</p>
                 {(
                   !auth.hasOneRole("_tide_dob.selfdecrypt") &&
                   !auth.hasOneRole("_tide_dob.selfencrypt") &&
@@ -370,10 +365,10 @@ export default function User(){
                   !auth.hasOneRole("_tide_cc.selfencrypt")
                 ) ? (
                   <p className="text-sm text-gray-600 mb-6">
-                    No roles, no data - exactly as designed. The Fabric refuses to reveal or accept fields you're not entitled to touch.
+                    Vendor A currently has no envelope access. The Fabric cannot reveal or accept your bid until the Tender Committee passes a motion granting the required roles.
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-600 mb-6">Sensitive data is only revealed to the right user, in the right context, at the edge - otherwise its encrypted all the time. User privacy can be guaranteed, while consequences of a breach are massively contained.</p>
+                  <p className="text-sm text-gray-600 mb-6">You are Vendor A. Submit delivery time in the technical envelope and your price in the financial envelope. Initially, you can read and edit delivery time, but price is write-only: once sealed, nobody can decrypt it, including your own session, until 3 of 5 committee members sign a motion to open the financial envelopes.</p>
                 )}
 
                 <form className="space-y-6" onSubmit={handleFormSubmit}>
@@ -382,12 +377,14 @@ export default function User(){
                     const writePerms = auth.hasOneRole(field === "dob" ? "_tide_dob.selfencrypt" : "_tide_cc.selfencrypt");
                     const canRead = !!readPerms;
                     const canWrite = !!writePerms;
-                    const label = field === "dob" ? "Date of Birth" : "Credit Card Number";
+                    const label = FIELDS[field].en;
 
                     // If user has neither read nor write permissions, only show the “encrypted” accordion block
                     if (!canRead && !canWrite) {
                       return (
                         <div key={i}>
+                          <p className="font-medium text-sm">{label}<Vi>{FIELDS[field].vi}</Vi></p>
+                          <span className="inline-block mt-2 rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">Sealed - no access in this session</span>
                           {showUserInfoAccordion && (
                             <div className="text-xs text-gray-600 mt-2 space-y-2 bg-gray-50 border border-gray-200 rounded p-3">
                               <h5 className="font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">
@@ -431,10 +428,19 @@ export default function User(){
                     // Otherwise, render a normal input (read/write, read-only, or write-only)
                     return (
                       <div key={field}>
-                        <label className="block font-medium text-sm mb-1">{label}</label>
+                        <label className="block font-medium text-sm mb-1">{label}<Vi>{FIELDS[field].vi}</Vi></label>
+                        <span className="block w-fit mb-2 rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                          {canWrite && !canRead
+                            ? "🔒 Sealed on submit - not even you can reopen it until the committee opens the envelopes"
+                            : canRead && !canWrite
+                              ? "Submissions closed - read-only"
+                              : "Open for editing"}
+                        </span>
                         {canRead && canWrite && (
                           <input
-                            type={field === "dob" ? "date" : "text"}
+                            type="text"
+                            inputMode="numeric"
+                            placeholder={FIELDS[field].placeholder}
                             value={formData[field]}
                             onChange={handleUserFieldChange(field)}
                             className="border rounded px-3 py-2 w-full max-w-md"
@@ -444,6 +450,8 @@ export default function User(){
                         {canRead && !canWrite && (
                           <input
                             type="text"
+                            inputMode="numeric"
+                            placeholder={FIELDS[field].placeholder}
                             value={formData[field] || ""}
                             readOnly
                             className="border rounded px-3 py-2 w-full bg-gray-100 text-gray-700 max-w-md"
@@ -452,8 +460,9 @@ export default function User(){
 
                         {!canRead && canWrite && (
                           <input
-                            type={field === "dob" ? "date" : "text"}
-                            placeholder={`Enter ${label.toLowerCase()}`}
+                            type="text"
+                            inputMode="numeric"
+                            placeholder={FIELDS[field].placeholder}
                             value={formData[field]}
                             onChange={handleUserFieldChange(field)}
                             className="border rounded px-3 py-2 w-full max-w-md"
@@ -503,7 +512,8 @@ export default function User(){
                   {(auth.hasOneRole("_tide_dob.selfencrypt") || auth.hasOneRole("_tide_cc.selfencrypt")) && (
                     <div className="flex items-center gap-3">
                       <Button className="hover:bg-red-700" type="submit" disabled={loadingButton}>
-                        Save Changes
+                        Seal &amp; Submit
+                        <span className="block text-xs italic text-red-100">Niêm phong &amp; nộp</span>
                       </Button>
                       {loadingButton && <div className="spinner" />}
                       {userFeedback && (

@@ -14,7 +14,7 @@ export async function GET(){
   
     // Dummy users to create
     // const users = [
-    //     {username: "demouser", dob: "1980-01-01", cc: "4111111111111111"},
+    //     {username: "demouser", dob: "45", cc: "12450000000"},
     //     {username: "testuser1", dob: "1990-02-02", cc: "378282246310005"},
     //     {username: "testuser2", dob: "2000-03-03", cc: "5555555555554444"},
     //     {username: "testuser3", dob: "2010-04-04", cc: "6011111111111117"},
@@ -24,7 +24,7 @@ export async function GET(){
     // The above data, but encrypted for demo purposes. Demo user shouldn't be able to decrypt this data
     // Demo user's data will only be encrypted when logged in for the first time to be decryptable.
     const users = [
-        {username: "demouser", dob: "1980-01-01", cc: "4111111111111111"},
+        {username: "demouser", dob: "45", cc: "12450000000"},
         {username: "testuser1", dob: "AQAAAAEAAAABRgAAACS9kjd+p9JceASgDD8ZJohTbp2q41G40hHCOPvNT0HPA5p1CJhWSDAThTALxE+sAh2BM5yA/HP+enjFpYtFiiZiFp13eEEIAAAAPO4baAAAAAAAAAAAQAAAAITlASV5Ik9pnCCTJFAv0dc4LYGNxZkbB1uyNGxSzWkQhMxwVglZy8xgS1G792wkXN1e/zfXBmBcZEC1B0zxlQs=", 
             cc: "AQAAAAEAAAABSwAAACCSi7I24CTr/Hl+ItmWQn1bY62fN6sqS7SmzBd+J5Iy4soIax1SUZdp1+IAjdAIskm0KhlMxCq+4DUdpH9jORtIsDJKB5vAJaQKOggAAAA/7htoAAAAAAAAAABAAAAAhLdDVwJAAxpENRDsCtiIbOmhPEX6s7VjFBaOcL7jM94ZPlpEJmaFVBzPQDol/EU2WSYuWX99UBzE3BTHGsnDAQ=="},
         {username: "testuser2", dob: "AQAAAAEAAAABRgAAAJEvRQaMRAC3vEiLJksOSJYCfa7u6QEDsP0RoS5JLIX39HS1yFGMILJemDUV1hQTDaFpoOtLiA8n7hNqwmhhObZyJm1d1LEIAAAAd+4baAAAAAAAAAAAQAAAAET3qUFdGaazKnem/kEqb9VLlMyGMQ8SbUXySF5QjtaNTz6qhBghRBdaE2Gg7+TO0qOc9nY1+7xbgyPciGS4NwU=", 

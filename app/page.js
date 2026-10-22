@@ -285,18 +285,18 @@ export default function Login() {
 </div>
 
               <AccordionBox
-  title="Why a breach no longer spells disaster"
+  title="Why no insider can rig this tender"
   isOpen={showLoginAccordion}
 >
   <p>
-    TideCloak bakes <em>breach-assumed</em> security into your stack by locking
-    data, identities, and access rights with keys no one will ever hold.
+    Sealed Tender runs on TideCloak, which locks bids, identities, and the rules
+    of the tender with keys no one will ever hold.
   </p>
 
   <ul className="list-disc pl-5 space-y-1 mt-2">
     <li>
       Digital authority becomes cryptographic keys - one per
-      user, admin, or service.
+      vendor, committee member, or service.
     </li>
     <li>
       Ineffable Cryptography is used to operate those keys, forever in
@@ -305,37 +305,37 @@ export default function Login() {
     </li>
     <li>
       No single fragment, user or server can authorize a login, decrypt data en mass, or change roles,
-      so nothing useful is exposed even if a DB server, admin account, or vendor is
-      breached.
+      so no bid price is exposed even if the database, the DBA, or the procurement head is
+      compromised.
     </li>
     <li>
       Users authenticate using a decentralized zero-knowledge mechanism known as PRISM. So, their secrets are never trusted to anyone, they cannot be impersonated, and no compromise of one user account will impact another.
     </li>
   </ul>
 
-  <p className="mt-2">Same login flow, radically smaller blast radius.</p>
+  <p className="mt-2">Same login flow, but nobody can peek at a bid before opening day.</p>
 </AccordionBox>
 
 
               <div className="bg-blue-50 rounded shadow p-6 space-y-4">
-                <img src="/playground-logo_nav.png" alt="Logo" className="h-10 w-auto" />
+                <div className="text-xl font-bold text-gray-800">🔒 Sealed Tender</div>
                 <h2 className="text-3xl font-bold">
-                  Welcome to the world of provable security
+                  Sealed bids that nobody can open early
                 </h2>
                 <p>
-                  <b>Picture this...</b> Your admin is <b>breached</b>, cloud host <b>exposed</b>.<br/>
-                  Yet, no data leaks, no identities stolen, no access abused. That's TideCloak.<br/>
-                  Ship fast. Build trust. Sleep easy.
+                  <b>Picture this...</b> The procurement head wants a <b>peek</b> at competitors' bids the night before opening, and the DBA could <b>export</b> the whole table.<br/>
+                  Yet, every price stays ciphertext until a 3-of-5 committee vote opens the envelopes. That's TideCloak.<br/>
+                  Bid fairly. Build trust. Sleep easy.
                 </p>
                 <hr className="my-6 border-t border-gray-200" />
                 <h3 className="text-xl font-semibold">Secure “BYOiD” Login</h3>
                 <p className="text-base">
-                  Login like normal - But your password is never stored, shared, or exposed.
+                  Log in as Vendor A - your password is never stored, shared, or exposed.
                 </p>
                 <Button onClick={handleLogin} className="hover:bg-red-700">
                   Login
                 </Button>
-                <p className="text-sm italic text-gray-600 mt-3">Identity for your eyes only.</p>
+                <p className="text-sm italic text-gray-600 mt-3">Your bid stays sealed until opening day.</p>
 
                 {showError && (
                   <div className="mt-2 flex items-center text-red-600 text-sm">

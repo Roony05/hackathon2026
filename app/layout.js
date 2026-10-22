@@ -7,8 +7,8 @@ import Nav from "./components/nav";
 import Footer from "./components/footer";
 
 export const metadata = {
-  title: 'TideCloak Demo',
-  description: 'The TideCloak Next.js Demo',
+  title: 'Sealed Tender',
+  description: 'Sealed two-envelope tendering where no single insider can peek or change the rules - built on TideCloak.',
   authors: [{ name: 'TideCloak' }],
   robots: 'index, follow',
 };

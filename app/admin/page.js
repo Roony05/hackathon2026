@@ -8,6 +8,7 @@ import Button from "../components/button";
 import { FaCheckCircle, FaChevronRight } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
+import { FIELDS, COMMITTEE, Vi } from "../tenderStory";
 import "../styles/spinKit.css";
 import "../styles/spinner.css";
 
@@ -55,7 +56,7 @@ function DoneCard({ router }) {
     return (
       <div className="bg-white border rounded-lg p-6 shadow flex items-center gap-3 mt-8">
         <div className="spinner--left" />
-        <span className="text-sm text-gray-600">Applying your changes…</span>
+        <span className="text-sm text-gray-600">Committing the committee motion…</span>
       </div>
     );
   }
@@ -65,7 +66,7 @@ function DoneCard({ router }) {
       <div className="mt-4">
         <div className="text-sm text-gray-700 flex items-center gap-2">
           <FaCheckCircle className="text-green-500" />
-          <span>Done! You can now explore the updated permissions.</span>
+          <span>Motion passed by quorum and committed. Check the Tender Board.</span>
           <a
             href="#"
             onClick={(e) => {
@@ -74,7 +75,7 @@ function DoneCard({ router }) {
             }}
             className="text-blue-600 hover:underline font-medium whitespace-nowrap"
           >
-            View on User Page →
+            View My Sealed Bid →
           </a>
         </div>
       </div>
@@ -566,7 +567,7 @@ export default function Admin() {
               >
                 <span className="font-semibold text-lg text-gray-700">{name[0]}</span>
               </div>
-              <span className="text-xs mt-2 text-gray-600">{name}</span>
+              <span className="text-xs mt-2 text-gray-600 text-center">{name} · {COMMITTEE[idx].role}</span>
 
               {/* Tick overlay – doesn't shift layout */}
               {approvals[idx] && (
@@ -597,7 +598,7 @@ export default function Admin() {
             
           ) : (
             <p className="text-sm text-gray-500 italic">
-              Awaiting quorum: <strong>{totalApproved} / 3</strong> approved
+              Awaiting quorum: <strong>{totalApproved} / 3</strong> signatures
             </p>
           )}
         </div>
@@ -700,15 +701,15 @@ export default function Admin() {
 
               {/* Accordion Content */}
               <AccordionBox
-  title="Why 'root' no longer exists"
+  title="Why no one can change the tender rules alone"
   isOpen={showAdminAccordion}
 >
   <ul className="list-disc pl-5 space-y-1">
-    <li><strong>BYOiD for admins.</strong> Even super-users authenticate through the decentralized Fabric - no password file or IdP root to hijack.</li>
-    <li><strong>Ownerless root certificate.</strong> The Fabric holds the signing key; nobody - vendors included - can impersonate or escalate.</li>
-    <li><strong>Every change = JWT-signed.</strong> A role lives only if the root cert endorses it; unsigned tweaks are ignored by the app and APIs.</li>
-    <li><strong>Quorum-enforced governance.</strong> Adding or widening roles needs multi-admin approval, baked into the same root cert.</li>
-    <li><strong>API-friendly.</strong> All of this is exposed as endpoints you can hit from the app.</li>
+    <li><strong>Committee identity.</strong> Each member authenticates through BYOiD and the decentralized Fabric.</li>
+    <li><strong>Ownerless root certificate.</strong> No chair, IT admin or platform operator controls the signing key.</li>
+    <li><strong>Signed rules.</strong> Envelope roles take effect only with the root certificate's endorsement; unsigned database edits grant no access.</li>
+    <li><strong>Committee quorum.</strong> Closing submissions, extending the deadline or opening financial envelopes needs 3 of 5 signatures.</li>
+    <li><strong>Enforced at the API.</strong> Calling an endpoint directly cannot bypass the signing rules.</li>
   </ul>
 </AccordionBox>
 
@@ -717,20 +718,20 @@ export default function Admin() {
 
               {!isTideAdmin && (
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-bold mb-4">Administration</h2>
-                  <p className="text-sm text-gray-600 mb-6">This page demonstrates how user privileges can be managed in App, and how the app is uniquely protected against a compromised admin.</p>
+                  <h2 className="text-3xl font-bold mb-4">Tender Committee<Vi>Hội đồng thầu</Vi></h2>
+                  <p className="text-sm text-gray-600 mb-6">Any change to the tender rules - close submissions, extend the deadline or open the financial envelopes - is a motion needing 3 of 5 committee signatures. No chair, IT admin or platform operator can push it through alone.</p>
                   {!showExplainer ? (
-                    <Button className="hover:bg-red-700" onClick={handleElevateClick}>Elevate to Admin Role</Button>
+                    <Button className="hover:bg-red-700" onClick={handleElevateClick}>Join the committee (demo)</Button>
                   ) : (
                     <div className="bg-yellow-50 border border-yellow-300 p-4 rounded space-y-3">
-                      <p className="font-semibold text-yellow-800">“Yeah, but doesn't the fact you can do this undermine the whole 'quorum-enforced' thing?”</p>
+                      <p className="font-semibold text-yellow-800">Why can I join the committee with a click?</p>
                       <p className="text-sm text-yellow-900">
-                        Can't get anything past you! This ability highlights the usual flaw in IAM systems - that the system itself can assign powers at will.
-                        With TideCloak, once hardened with a quorum, even the system can't unilaterally grant admin rights.
-                        <br /><br /><strong>For this demo, you're a quorum of one.</strong>
+                        This demo shortcut lets you play committee member #1; the other four members are simulated.
+                        In a realm hardened with a quorum, even the platform cannot unilaterally grant committee powers.
+                        <br /><br /><strong>The demo simulates 3-of-5 signatures; you provide the first member's review.</strong>
                       </p>
                       <div className="flex items-center gap-x-4">
-                        <Button className="hover:bg-red-700" onClick={confirmAdmin} disabled={loadingButton}>Continue as Admin</Button>
+                        <Button className="hover:bg-red-700" onClick={confirmAdmin} disabled={loadingButton}>Continue as committee member #1</Button>
                         {
                           loadingButton
                           ? <div className="spinner--left"/>
@@ -744,9 +745,9 @@ export default function Admin() {
 
               {isTideAdmin && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl font-bold mb-4">Administration</h2>
+                  <h2 className="text-3xl font-bold mb-4">Tender Committee<Vi>Hội đồng thầu</Vi></h2>
                   <p className="text-sm text-gray-700">
-                    Change your permissions to demo the quorum-enforced workflow for change requests, then check out how the permission changes affect the User experience on the User page.
+                    Any change to the tender rules - close submissions, extend the deadline or open the financial envelopes - is a motion needing 3 of 5 committee signatures. No chair, IT admin or platform operator can push it through alone.
                   </p>
                   <form
                     onSubmit={handleAdminPermissionSubmit}
@@ -754,41 +755,42 @@ export default function Admin() {
                     className="space-y-6"
                   >
                     <div className="border rounded-lg p-6 bg-white shadow-sm space-y-6">
-                      <h4 className="text-xl font-bold text-gray-800">User Permissions</h4>
+                      <h4 className="text-xl font-bold text-gray-800">Motion: Vendor A's envelopes</h4>
+                      <p className="text-sm text-gray-600">Revoke Write to close submissions. Re-grant Write after the deadline to extend it - the classic bid-rigging favour also needs 3 of 5 signatures. Grant Read to open the financial envelopes.</p>
 
                       {/* Date of Birth */}
                       <div>
-                        <label className="block font-semibold text-sm mb-1">Date of Birth</label>
+                        <label className="block font-semibold text-sm mb-1">{FIELDS.dob.en}<Vi>{FIELDS.dob.vi}</Vi></label>
                         <div className="flex gap-6">
                           <label className="flex items-center gap-2">
                             <input type="checkbox" name="dob.read" checked={hasDobReadPerm} onChange={e => setHasDobReadPerm(e.target.checked)}/>
-                            <span>Read</span>
+                            <span>Open (read)</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input type="checkbox" name="dob.write" checked={hasDobWritePerm} onChange={e => setHasDobWritePerm(e.target.checked)}/>
-                            <span>Write</span>
+                            <span>Accept submissions (write)</span>
                           </label>
                         </div>
                       </div>
 
                       {/* Credit Card Number */}
                       <div>
-                        <label className="block font-semibold text-sm mb-1">Credit Card Number</label>
+                        <label className="block font-semibold text-sm mb-1">{FIELDS.cc.en}<Vi>{FIELDS.cc.vi}</Vi></label>
                         <div className="flex gap-6">
                           <label className="flex items-center gap-2">
                             <input type="checkbox" name="cc.read" checked={hasCcReadPerm} onChange={e => setHasCcReadPerm(e.target.checked)}/>
-                            <span>Read</span>
+                            <span>Open (read)</span>
                           </label>
                           <label className="flex items-center gap-2">
                             <input type="checkbox" name="cc.write" checked={hasCcWritePerm} onChange={e => setHasCcWritePerm(e.target.checked)}/>
-                            <span>Write</span>
+                            <span>Accept submissions (write)</span>
                           </label>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-x-2">
-                      <Button className="hover:bg-red-700" type="submit" disabled={!hasChanges || loadingOverlay}>Submit Changes</Button>
+                      <Button className="hover:bg-red-700" type="submit" disabled={!hasChanges || loadingOverlay}>Table motion</Button>
                       {
                         loadingOverlay
                         ? <div className="spinner--left"/>
@@ -801,12 +803,12 @@ export default function Admin() {
                     <>
                       {/* Sub-heading + info toggle */}
                       <div className="relative mb-2">
-                        <h3 className="text-xl font-semibold">Change Requests</h3>
-                        <p className="text-sm text-gray-700">Play your role as an admin in the quorum, by reviewing the Change Request. We'll simulate the others before you can then commit the change.</p>
+                        <h3 className="text-xl font-semibold">Motions awaiting signatures<Vi>Đề xuất chờ ký</Vi></h3>
+                        <p className="text-sm text-gray-700">Review the motion as committee member #1. The other four members are simulated; once 3 of 5 signatures are recorded, you can commit the new rules.</p>
                         <button
                           onClick={() => setShowChangeInfo(prev => !prev)}
                           className="absolute -top-2 right-0 text-2xl hover:scale-110 transition-transform"
-                          aria-label="Toggle change-request info"
+                          aria-label="Toggle motion explanation"
                         >
                           {showChangeInfo ? "🤯" : "🤔"}
                         </button>
@@ -814,17 +816,17 @@ export default function Admin() {
 
                       {showChangeInfo && (
                         <AccordionBox
-  title="How a change request becomes law"
+  title="How a committee motion becomes the tender rules"
   isOpen
 >
   <ul className="list-disc pl-5 space-y-1">
-    <li><strong>Draft → Quorum.</strong> Submit a draft; the Fabric locks it until T-of-N admins sign.</li>
-    <li><strong>Fabric signs or refuses.</strong> Only after quorum does the ownerless root key sign the updated JWT template.</li>
-    <li><strong>No backdoor 'commit'.</strong> The API call you're about to hit can't bypass quorum - the Fabric will flat-out reject it.</li>
-    <li><strong>Immutable audit trail.</strong> Every signature and commit is hashed and stored; tampering is mathematically evident.</li>
+    <li><strong>Draft motion.</strong> Table the proposed envelope rules; the Fabric locks the motion until 3 of 5 committee members sign.</li>
+    <li><strong>Ownerless key signs.</strong> Only after quorum does the ownerless root key sign the new rules in the updated JWT template.</li>
+    <li><strong>No backdoor commit.</strong> Neither the chair nor an IT admin can bypass quorum with a direct API call.</li>
+    <li><strong>Tamper-evident audit trail.</strong> Every signature and commit is hashed and stored, making later changes detectable.</li>
   </ul>
   <p className="text-sm text-gray-600 mt-2">
-    Click <em>Review</em> to approve as “You,” then watch the other simulated admins light up
+    Click <em>Review</em> to sign as committee member #1, then watch the simulated members light up
     before the <strong>Commit</strong> button appears.
   </p>
 </AccordionBox>
@@ -851,7 +853,7 @@ export default function Admin() {
                                 <div className="flex items-center gap-2">
                                   {isActive && <FaChevronRight className="text-blue-500" />}
                                   <span className="font-medium">
-                                    Change: {req.role} permission
+                                    Motion: {req.role} permission
                                   </span>
                                 </div>
                                 {

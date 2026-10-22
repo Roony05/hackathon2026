@@ -15,6 +15,9 @@ export default function Footer(){
         <footer className="mt-auto p-4 bg-gray-100 flex flex-col md:flex-row justify-between items-center text-sm gap-2 md:gap-0">
 
         <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+          <p className="font-medium">
+            Sealed Tender - built on TideCloak for RMIT Hackathon 2026. All companies and bids are fictional.
+          </p>
           <p>
             Secured by{" "}
             <a href="https://tide.org/tidecloak_product" className="text-blue-600 underline" target="_blank">TideCloak</a>
