@@ -54,10 +54,16 @@ function mintCiphertext() {
 // ---- SIMULATED personas + policy engine (stand-in for TideCloak realm roles + Fabric-signed tokens) ----
 export const PERSONAS = {
   vendor: { id: "vendor", label: "Vendor A · bidder", vi: "Nhà thầu A · bên dự thầu", realmRoles: ["vendor"], blurb: "Seals a price and delivery time." },
-  procurement: { id: "procurement", label: "Procurement head · committee member #1", vi: "Trưởng phòng mua sắm · thành viên hội đồng #1", realmRoles: ["committee-member", "procurement-head"], blurb: "Tables and signs motions." },
+  procurement: { id: "procurement", label: "You · Procurement head (member #1)", vi: "Trưởng phòng mua sắm · thành viên hội đồng #1", realmRoles: ["committee-member", "procurement-head"], blurb: "Tables and signs motions." },
+  finance: { id: "finance", label: "Alice · Finance", vi: "Alice · Tài chính", realmRoles: ["committee-member"], blurb: "Committee member #2." },
+  technical: { id: "technical", label: "Ben · Technical lead", vi: "Ben · Trưởng kỹ thuật", realmRoles: ["committee-member"], blurb: "Committee member #3." },
+  audit: { id: "audit", label: "Carlos · Internal audit", vi: "Carlos · Kiểm toán nội bộ", realmRoles: ["committee-member"], blurb: "Committee member #4." },
+  independent: { id: "independent", label: "Dana · Independent member", vi: "Dana · Thành viên độc lập", realmRoles: ["committee-member"], blurb: "Committee member #5." },
   itadmin: { id: "itadmin", label: "IT admin / DBA", vi: "Quản trị IT / DBA", realmRoles: ["it-admin"], blurb: "Sees the database, ciphertext only." },
   ai: { id: "ai", label: "AI evaluation agent", vi: "Tác tử AI chấm thầu", realmRoles: ["ai-agent"], blurb: "Reads prices only after opening." },
 };
+export const COMMITTEE_IDS = ["procurement", "finance", "technical", "audit", "independent"];
+const isCommittee = (p) => COMMITTEE_IDS.includes(p);
 const COOKIE = "sim_persona";
 function setPersonaCookie(id) {
   try { document.cookie = id ? `${COOKIE}=${id}; path=/` : `${COOKIE}=; path=/; max-age=0`; } catch {}
@@ -98,17 +104,19 @@ export function checkAccess(action, c = {}) {
       return p === "vendor" ? A("vendor submits own bid", "requires realm role vendor") : D(`${who} is not a bidder`, "requires realm role vendor");
     case "open":
       if (arg === "/user") return p === "vendor" ? A("bidder opens own sealed bid", "route /user requires realm role vendor") : D(`${who} is not a bidder`, "route /user requires realm role vendor");
-      if (arg === "/admin") return p === "procurement" ? A("committee member", "route /admin requires realm role committee-member") : D(`${who} is not a committee member`, "route /admin requires realm role committee-member");
+      if (arg === "/admin") return isCommittee(p) ? A("committee member", "route /admin requires realm role committee-member") : D(`${who} is not a committee member`, "route /admin requires realm role committee-member");
       return A("ciphertext view is open to all signed-in users", "route allowed for any persona");
     case "motion.table":
-      return p === "procurement" ? A("committee member may draft a motion", "requires realm role committee-member") : D(`${who} cannot table motions`, "requires realm role committee-member");
+      return isCommittee(p) ? A("committee member may draft a motion", "requires realm role committee-member") : D(`${who} cannot table motions`, "requires realm role committee-member");
     case "motion.sign":
-      return p === "procurement" ? A("signature recorded", "requires realm role committee-member") : D(`${who} cannot sign motions`, "requires realm role committee-member");
+      if (!isCommittee(p)) return D(`${who} cannot sign motions`, "requires realm role committee-member");
+      if (c.signed) return D("already signed", "one signature per committee member");
+      return A("signature recorded", "requires realm role committee-member");
     case "motion.commit":
-      if (p !== "procurement") return D(`${who} cannot commit`, quorumRule);
-      return c.ready ? A("3/5 signatures collected", quorumRule) : D("quorum not reached; one person cannot change roles alone", quorumRule);
+      if (!isCommittee(p)) return D(`${who} cannot commit`, quorumRule);
+      return c.ready ? A("3/5 signatures collected", quorumRule) : D(`needs 3 distinct committee signatures (have ${c.signerCount ?? 0})`, quorumRule);
     case "committee.elevate":
-      return p === "procurement" ? A("procurement head joins the committee", "requires realm role procurement-head") : D(`${who} cannot join the committee`, "requires realm role procurement-head");
+      return isCommittee(p) ? A("committee member joins the committee", "requires realm role committee-member") : D(`${who} cannot join the committee`, "requires realm role committee-member");
     case "ai.readPrices":
       if (p !== "ai") return D(`${who} is not the AI agent`, "requires realm role ai-agent");
       return c.phase === 3 ? A("financial envelopes were opened by quorum", "prices readable only in phase 3 (_tide_cc.selfdecrypt granted)") : D("envelopes still sealed (phase " + c.phase + ")", "prices readable only in phase 3 (_tide_cc.selfdecrypt granted)");
@@ -118,6 +126,8 @@ export function checkAccess(action, c = {}) {
       return D("unknown action", "default deny");
   }
 }
+
+const adminsOf = (s) => s.admins || (s.isAdmin ? ["procurement"] : []);
 
 function freshState() {
   return {
@@ -183,7 +193,7 @@ function toCR(cr) {
     id: cr.id,
     entityType: "USER",
     status: "PENDING",
-    readyToCommit: !!cr.readyToCommit,
+    readyToCommit: (cr.signers || []).length >= 3,
     role: cr.role,
     actionType: cr.action,
     userRecord: [{ accessDraft: `${cr.action} realm role ${cr.role} for user demouser (preview draft ${cr.id})` }],
@@ -207,12 +217,12 @@ function createBackend(get, mutate, guard) {
         if (s.persona === "itadmin") guard("db.export");
         return json({ ok: true, users: buildUsers(s) });
       case "/api/checkAdminRole":
-        return json({ ok: true, isAdmin: s.isAdmin && s.persona === "procurement", user: buildUser(s) });
+        return json({ ok: true, isAdmin: adminsOf(s).includes(s.persona), user: buildUser(s) });
       case "/api/commitAdminRole": {
         const r = guard("committee.elevate");
         if (!r.allow) return json({ ok: false, error: r.reason }, 403);
         await sleep(700);
-        mutate((x) => ({ ...x, isAdmin: true }));
+        mutate((x) => ({ ...x, isAdmin: true, admins: Array.from(new Set([...adminsOf(x), x.persona])) }));
         return json({ ok: true });
       }
       case "/api/getRealmRoles": {
@@ -270,9 +280,9 @@ function createBackend(get, mutate, guard) {
       if (!cr) return json({ error: "not found" }, 404);
       if (action === "approve") {
         if (body && body.requestModel) {
-          const r = guard("motion.sign", { label: `${cr.action} ${cr.role}` });
+          const r = guard("motion.sign", { label: `${cr.action} ${cr.role}`, signed: (cr.signers || []).includes(s.persona) });
           if (!r.allow) return json({ error: r.reason }, 403);
-          mutate((x) => ({ ...x, requests: x.requests.map((r) => (r.id === id ? { ...r, readyToCommit: true } : r)) }));
+          mutate((x) => ({ ...x, requests: x.requests.map((q) => (q.id === id ? { ...q, signers: Array.from(new Set([...(q.signers || []), x.persona])) } : q)) }));
           return json({ mode: "recorded" });
         }
         return json({ mode: "needs-approval", requestModel: btoa("preview-enclave-carrier-" + id) });
@@ -283,7 +293,7 @@ function createBackend(get, mutate, guard) {
       }
       // commit: apply the role change, then drop the request
       {
-        const r = guard("motion.commit", { ready: !!cr.readyToCommit, label: `${cr.action} ${cr.role}` });
+        const r = guard("motion.commit", { ready: (cr.signers || []).length >= 3, signerCount: (cr.signers || []).length, label: `${cr.action} ${cr.role}` });
         if (!r.allow) return json({ error: r.reason }, 403);
       }
       mutate((x) => {
@@ -308,6 +318,7 @@ function createBackend(get, mutate, guard) {
           role: r.name,
           action: method === "POST" ? "GRANT" : "REVOKE",
           readyToCommit: false,
+          signers: [],
         }));
         return { ...x, nextReq: next, requests: [...x.requests, ...added] };
       });
@@ -439,7 +450,7 @@ export function PreviewAuthProvider({ Context, children }) {
   // motion target, so it gets a read-only view; every other persona sees none.
   const hasRole = (role) => {
     const cur = stRef.current;
-    if (role.startsWith("_tide_")) return (cur.persona === "vendor" || cur.persona === "procurement") && cur.roles.includes(role);
+    if (role.startsWith("_tide_")) return (cur.persona === "vendor" || isCommittee(cur.persona)) && cur.roles.includes(role);
     return !!PERSONAS[cur.persona]?.realmRoles.includes(role);
   };
 
@@ -513,6 +524,8 @@ export function PreviewAuthProvider({ Context, children }) {
     logAccess,
     switchPersona,
     readOpenedPrice,
+    signersFor: (requestId) => ((st.requests || []).find((r) => r.id === requestId)?.signers) || [],
+    committee: COMMITTEE_IDS.map((id) => ({ id, label: PERSONAS[id].label })),
   };
 
   const value = {
@@ -530,7 +543,7 @@ export function PreviewAuthProvider({ Context, children }) {
     // roles
     hasOneRole,
     hasRealmRole: hasRole,
-    hasClientRole: (role) => (role === "tide-realm-admin" ? stRef.current.isAdmin && stRef.current.persona === "procurement" : false),
+    hasClientRole: (role) => (role === "tide-realm-admin" ? adminsOf(stRef.current).includes(stRef.current.persona) : false),
     // tokens
     getValueFromToken: (key) => (key === "vuid" ? VUID : key === "preferred_username" ? "demouser" : undefined),
     getValueFromIdToken: (key) => (key === "dob" ? stRef.current.ct.dob : key === "cc" ? stRef.current.ct.cc : key === "vuid" ? VUID : undefined),
@@ -589,7 +602,11 @@ export function PreviewLanding() {
           <span className="pill chip-pending">simulated</span>
         </div>
         <Group pill="pill-buyer" tag="Buyer" title="Lotus Industries (procuring entity)">
-          <Row id="procurement" name="Procurement head" line="Runs the tender, needs 3/5 to act" />
+          <Row id="procurement" name="Tender committee · You, Procurement head" line="Member #1 · needs 3/5 to act" />
+          <Row id="finance" name="Tender committee · Alice, Finance" line="Member #2 · needs 3/5 to act" />
+          <Row id="technical" name="Tender committee · Ben, Technical lead" line="Member #3 · needs 3/5 to act" />
+          <Row id="audit" name="Tender committee · Carlos, Internal audit" line="Member #4 · needs 3/5 to act" />
+          <Row id="independent" name="Tender committee · Dana, Independent member" line="Member #5 · needs 3/5 to act" />
           <Row id="ai" name="AI evaluator" line="Ranks bids after opening" />
         </Group>
         <Group pill="pill-seller" tag="Sellers" title="bidders">

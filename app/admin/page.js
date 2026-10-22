@@ -25,8 +25,10 @@ import "../styles/spinner.css";
  */
 function DoneCard({ router }) {
   const [ready, setReady] = useState(false);
+  const pv = useAuth().preview;
 
   useEffect(() => {
+    if (pv) { setReady(true); return; }
     let cancelled = false;
     let attempts = 0;
 
@@ -71,11 +73,11 @@ function DoneCard({ router }) {
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              router.push("/user");
+              router.push(pv ? "/tender" : "/user");
             }}
             className="text-blue-600 hover:underline font-medium whitespace-nowrap"
           >
-            View My Sealed Bid →
+            {pv ? "Back to Tender Board →" : "View My Sealed Bid →"}
           </a>
         </div>
       </div>
@@ -508,6 +510,10 @@ export default function Admin() {
           requests[activeRequestIndex] = updatedChangeReq
             ?? { ...requests[activeRequestIndex], status: "APPROVED" };
 
+          if (auth.preview) {
+            setRequests([...updatedChangeReqs.filter((r) => r.deleteStatus !== "DENIED" && r.status !== "DENIED")]);
+            return;
+          }
           setApprovals([true, false, false, false, false]);
           setPending(true);
           setHasUserApproved(true);
@@ -554,6 +560,13 @@ export default function Admin() {
         }
       };
 
+      // Preview only: real per-persona signatures from the shared simulated state
+      const pvSigners = auth.preview ? auth.preview.signersFor(request.draftRecordId) : null;
+      const pvLights = pvSigners ? auth.preview.committee.map((c) => pvSigners.includes(c.id)) : null;
+      const pvSigned = pvSigners ? pvSigners.includes(auth.preview.persona) : false;
+      const lights = pvLights || approvals;
+      const signedCount = pvSigners ? pvSigners.length : totalApproved;
+
       return (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow space-y-4 mt-8">
 
@@ -562,7 +575,7 @@ export default function Admin() {
             <div key={idx} className="relative flex flex-col items-center">
               <div
                 className={`w-14 h-14 flex items-center justify-center rounded-full border-4 transition-all duration-700 ease-in-out 
-          ${approvals[idx] ? "border-green-500 shadow-md shadow-green-200" : "border-slate-200"}
+          ${lights[idx] ? "border-green-500 shadow-md shadow-green-200" : "border-slate-200"}
         `}
               >
                 <span className="font-semibold text-lg text-slate-600">{name[0]}</span>
@@ -570,7 +583,7 @@ export default function Admin() {
               <span className="text-xs mt-2 text-slate-600 text-center">{name} · {COMMITTEE[idx].role}</span>
 
               {/* Tick overlay – doesn't shift layout */}
-              {approvals[idx] && (
+              {lights[idx] && (
                 <FaCheckCircle className="absolute top-0 right-0 text-green-500 w-4 h-4 transition-opacity duration-500 translate-x-2 -translate-y-2" />
               )}
             </div>
@@ -579,7 +592,29 @@ export default function Admin() {
         </div>
 
         <div className="pt-4">
-          { request.deleteStatus === "DRAFT" || request.status === "DRAFT"? (
+          {pvSigners && (
+            <p className="text-xs text-slate-500 mb-2">
+              Signed by: {pvSigners.length ? auth.preview.committee.filter((c) => pvSigners.includes(c.id)).map((c) => c.label).join(", ") : "nobody yet"}
+            </p>
+          )}
+          { pvSigners ? (
+            pvSigners.length >= 3 ? (
+              <div className="flex items-center gap-x-2">
+                <Button className="rounded-full bg-emerald-600 text-white hover:bg-emerald-700" onClick={onCommit} disabled={loadingButton}>
+                  Commit
+                </Button>
+                {loadingButton ? <div className="spinner--left"/> : null}
+              </div>
+            ) : !pvSigned ? (
+              <Button className="rounded-full" onClick={() => {handleUserApprove(request)}}>
+                Review
+              </Button>
+            ) : (
+              <p className="text-sm text-slate-500 italic">
+                You signed. Awaiting quorum: <strong>{signedCount} / 3</strong> signatures. Switch to another committee member to sign.
+              </p>
+            )
+          ) : request.deleteStatus === "DRAFT" || request.status === "DRAFT"? (
             <Button className="rounded-full" onClick={() => {handleUserApprove(request)}} disabled={pending}>
               Review
             </Button>

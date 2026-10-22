@@ -65,6 +65,10 @@ export function Vi() {
 export const PERSONA_PAGES = {
   vendor: ["/tender", "/user"],
   procurement: ["/tender", "/admin"],
+  finance: ["/tender", "/admin"],
+  technical: ["/tender", "/admin"],
+  audit: ["/tender", "/admin"],
+  independent: ["/tender", "/admin"],
   itadmin: ["/databaseExposure"],
   ai: ["/tender"],
 };

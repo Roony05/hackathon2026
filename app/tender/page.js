@@ -170,7 +170,7 @@ export default function TenderBoard() {
     setAiResult({ allow: true, prices: r.prices, reason: r.reason, rule: r.rule, summary });
   };
 
-  const SIDE = { vendor: ["Seller", "pill-seller"], procurement: ["Buyer", "pill-buyer"], ai: ["AI", "pill-ai"], itadmin: ["Platform", "pill-platform"] };
+  const SIDE = { vendor: ["Seller", "pill-seller"], procurement: ["Buyer", "pill-buyer"], finance: ["Buyer", "pill-buyer"], technical: ["Buyer", "pill-buyer"], audit: ["Buyer", "pill-buyer"], independent: ["Buyer", "pill-buyer"], ai: ["AI", "pill-ai"], itadmin: ["Platform", "pill-platform"] };
   const chip = "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium";
   const sealedChip = (
     <span className={chip + " chip-sealed"}>🔒 Sealed</span>

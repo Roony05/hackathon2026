@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { useAuth } from "../context/AuthProvider";
 import { releaseScrollIfIdle } from "./loadingSquare";
 
-const SIDE = { vendor: ["Seller", "pill-seller"], procurement: ["Buyer", "pill-buyer"], ai: ["AI", "pill-ai"], itadmin: ["Platform", "pill-platform"] };
+const SIDE = { vendor: ["Seller", "pill-seller"], procurement: ["Buyer", "pill-buyer"], finance: ["Buyer", "pill-buyer"], technical: ["Buyer", "pill-buyer"], audit: ["Buyer", "pill-buyer"], independent: ["Buyer", "pill-buyer"], ai: ["AI", "pill-ai"], itadmin: ["Platform", "pill-platform"] };
 
 /**
  * Top navigation bar shown after login.
@@ -36,7 +36,7 @@ export default function Nav() {
   // Preview only: hide links the simulated persona cannot open
   const pv = auth.preview;
   const showUser = !pv || pv.persona === "vendor";
-  const showAdmin = !pv || pv.persona === "procurement";
+  const showAdmin = !pv || (pv.committee || []).some((c) => c.id === pv.persona);
   const showTender = !pv || pv.persona !== "itadmin";
   const showInsider = !pv || pv.persona === "itadmin";
 

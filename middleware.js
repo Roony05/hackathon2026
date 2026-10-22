@@ -15,11 +15,11 @@ export async function middleware(req) {
   // (verifyTideCloakToken below): a UI check is not authorization, the server must enforce it.
   if (process.env.NEXT_PUBLIC_PREVIEW_MODE !== "0") {
     const persona = req.cookies?.get("sim_persona")?.value;
-    if (!["vendor", "procurement", "itadmin", "ai"].includes(persona)) {
+    if (!["vendor", "procurement", "finance", "technical", "audit", "independent", "itadmin", "ai"].includes(persona)) {
       return NextResponse.redirect(new URL("/", req.url));
     }
     const p = req.nextUrl.pathname;
-    if (p.startsWith("/admin") && persona !== "procurement") {
+    if (p.startsWith("/admin") && !["procurement", "finance", "technical", "audit", "independent"].includes(persona)) {
       return NextResponse.redirect(new URL("/home?denied=admin", req.url));
     }
     if (p.startsWith("/user") && persona !== "vendor") {
