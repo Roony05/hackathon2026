@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -16,6 +16,11 @@ export default function HomePage() {
   const auth = useAuth();
   const { backgroundProcessing } = auth;
   const [showHomeAccordion, setShowHomeAccordion] = useState(false);
+  const [denied, setDenied] = useState(null);
+  useEffect(() => {
+    if (!auth.preview) return;
+    setDenied(new URLSearchParams(window.location.search).get("denied"));
+  }, [auth.preview]);
 
   const demos = [
     { title: "Tender Board",     sub: "The tender, its phase and every bid",        href: "/tender",           icon: FaClipboardList },
@@ -26,6 +31,11 @@ export default function HomePage() {
 
   return (
     <main className="container mx-auto max-w-screen-lg px-4 py-12">
+      {denied && (
+        <div className="mb-6 rounded-xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+          Access denied by policy (simulated server-side check): your persona cannot open /{denied}.
+        </div>
+      )}
       {/* Hero */}
       <motion.section
         initial={{ opacity: 0, y: 24 }}

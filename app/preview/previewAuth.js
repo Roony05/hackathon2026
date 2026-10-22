@@ -5,8 +5,9 @@
 // NEXT_PUBLIC_PREVIEW_MODE === "1" (see app/context/AuthProvider.js).
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
+import { usePathname } from "next/navigation";
 import appService from "../../lib/appService";
+import { VENDORS } from "../tenderStory";
 
 export const PREVIEW_BASE_URL = "http://preview.local";
 export const PREVIEW_REALM = "tidecloak-demo";
@@ -50,8 +51,78 @@ function mintCiphertext() {
   return s + "==";
 }
 
+// ---- SIMULATED personas + policy engine (stand-in for TideCloak realm roles + Fabric-signed tokens) ----
+export const PERSONAS = {
+  vendor: { id: "vendor", label: "Vendor A · bidder", vi: "Nhà thầu A · bên dự thầu", realmRoles: ["vendor"], blurb: "Seals a price and delivery time under its own key." },
+  procurement: { id: "procurement", label: "Procurement head · committee member #1", vi: "Trưởng phòng mua sắm · thành viên hội đồng #1", realmRoles: ["committee-member", "procurement-head"], blurb: "Tables and signs motions. Holds no envelope roles." },
+  itadmin: { id: "itadmin", label: "IT admin / DBA", vi: "Quản trị IT / DBA", realmRoles: ["it-admin"], blurb: "Full database access, but ciphertext only." },
+  ai: { id: "ai", label: "AI evaluation agent", vi: "Tác tử AI chấm thầu", realmRoles: ["ai-agent"], blurb: "Reads the board; prices only after opening." },
+};
+const COOKIE = "sim_persona";
+function setPersonaCookie(id) {
+  try { document.cookie = id ? `${COOKIE}=${id}; path=/` : `${COOKIE}=; path=/; max-age=0`; } catch {}
+}
+function readPersonaCookie() {
+  try {
+    const m = document.cookie.match(new RegExp(`(?:^|; )${COOKIE}=([^;]*)`));
+    return m && PERSONAS[m[1]] ? m[1] : null;
+  } catch { return null; }
+}
+const phaseOf = (roles) => (roles.includes("_tide_cc.selfdecrypt") ? 3 : roles.includes("_tide_cc.selfencrypt") ? 1 : 2);
+const nowStr = () => new Date().toTimeString().slice(0, 8);
+
+/** SIMULATED policy decision point. In real mode TideCloak + Fabric-signed tokens decide this. */
+export function checkAccess(action, c = {}) {
+  const p = c.persona;
+  const vr = c.vendorRoles || [];
+  const A = (reason, rule) => ({ allow: true, reason, rule });
+  const D = (reason, rule) => ({ allow: false, reason, rule });
+  const [kind, arg] = action.split(":");
+  const who = PERSONAS[p]?.label || "anonymous";
+  const quorumRule = "role change needs 3/5 committee quorum";
+  switch (kind) {
+    case "decrypt": {
+      const rule = `requires _tide_${arg}.selfdecrypt in a Fabric-signed token`;
+      if (c.foreign) return D("ciphertext belongs to another vendor's key", "each row is sealed under its owner's key; no role unlocks it");
+      if (p !== "vendor") return D(`${who} holds no envelope roles`, rule);
+      if (!vr.includes(`_tide_${arg}.selfdecrypt`)) return D(`role _tide_${arg}.selfdecrypt not granted`, rule);
+      return A("role present; decrypts in the browser", rule);
+    }
+    case "encrypt": {
+      const rule = `requires _tide_${arg}.selfencrypt in a Fabric-signed token`;
+      if (p !== "vendor") return D(`${who} holds no envelope roles`, rule);
+      if (!vr.includes(`_tide_${arg}.selfencrypt`)) return D(`role _tide_${arg}.selfencrypt not granted (envelope closed)`, rule);
+      return A("write-only role present", rule);
+    }
+    case "bid.submit":
+      return p === "vendor" ? A("vendor submits own bid", "requires realm role vendor") : D(`${who} is not a bidder`, "requires realm role vendor");
+    case "open":
+      if (arg === "/user") return p === "vendor" ? A("bidder opens own sealed bid", "route /user requires realm role vendor") : D(`${who} is not a bidder`, "route /user requires realm role vendor");
+      if (arg === "/admin") return p === "procurement" ? A("committee member", "route /admin requires realm role committee-member") : D(`${who} is not a committee member`, "route /admin requires realm role committee-member");
+      return A("ciphertext view is open to all signed-in users", "route allowed for any persona");
+    case "motion.table":
+      return p === "procurement" ? A("committee member may draft a motion", "requires realm role committee-member") : D(`${who} cannot table motions`, "requires realm role committee-member");
+    case "motion.sign":
+      return p === "procurement" ? A("signature recorded", "requires realm role committee-member") : D(`${who} cannot sign motions`, "requires realm role committee-member");
+    case "motion.commit":
+      if (p !== "procurement") return D(`${who} cannot commit`, quorumRule);
+      return c.ready ? A("3/5 signatures collected", quorumRule) : D("quorum not reached; one person cannot change roles alone", quorumRule);
+    case "committee.elevate":
+      return p === "procurement" ? A("procurement head joins the committee", "requires realm role procurement-head") : D(`${who} cannot join the committee`, "requires realm role procurement-head");
+    case "ai.readPrices":
+      if (p !== "ai") return D(`${who} is not the AI agent`, "requires realm role ai-agent");
+      return c.phase === 3 ? A("financial envelopes were opened by quorum", "prices readable only in phase 3 (_tide_cc.selfdecrypt granted)") : D("envelopes still sealed (phase " + c.phase + ")", "prices readable only in phase 3 (_tide_cc.selfdecrypt granted)");
+    case "db.export":
+      return p === "itadmin" ? A("export allowed, ciphertext only", "DB access exposes ciphertext, never keys") : D(`${who} has no DB access`, "requires realm role it-admin");
+    default:
+      return D("unknown action", "default deny");
+  }
+}
+
 function freshState() {
   return {
+    persona: null,
+    log: [],
     roles: ["_tide_dob.selfencrypt", "_tide_dob.selfdecrypt", "_tide_cc.selfencrypt"],
     isAdmin: false,
     plain: { dob: "45", cc: "12450000000" },
@@ -66,7 +137,7 @@ function loadState() {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      if (s && s.roles && s.ct && s.plain) return s;
+      if (s && s.roles && s.ct && s.plain) return { persona: null, log: [], ...s };
     }
   } catch {}
   return freshState();
@@ -123,7 +194,7 @@ function toCR(cr) {
  * Creates the mock backend bound to a state ref. All handlers read/write through
  * `get()` / `mutate(fn)` so they are always working on the latest state.
  */
-function createBackend(get, mutate) {
+function createBackend(get, mutate, guard) {
   // Handles the same-origin /api/* routes
   async function handleApi(path, search, init) {
     const params = new URLSearchParams(search);
@@ -133,13 +204,17 @@ function createBackend(get, mutate) {
       case "/api/getUserByVuid":
         return json({ ok: true, user: params.get("vuid") === VUID ? buildUser(s) : null });
       case "/api/getUsers":
+        if (s.persona === "itadmin") guard("db.export");
         return json({ ok: true, users: buildUsers(s) });
       case "/api/checkAdminRole":
-        return json({ ok: true, isAdmin: s.isAdmin, user: buildUser(s) });
-      case "/api/commitAdminRole":
+        return json({ ok: true, isAdmin: s.isAdmin && s.persona === "procurement", user: buildUser(s) });
+      case "/api/commitAdminRole": {
+        const r = guard("committee.elevate");
+        if (!r.allow) return json({ ok: false, error: r.reason }, 403);
         await sleep(700);
         mutate((x) => ({ ...x, isAdmin: true }));
         return json({ ok: true });
+      }
       case "/api/getRealmRoles": {
         const names = (params.get("names") || "").split(",").map((n) => n.trim()).filter(Boolean);
         const roles = {};
@@ -150,6 +225,8 @@ function createBackend(get, mutate) {
         mutate((x) => ({ ...x, roles: Array.from(new Set([...x.roles, "_tide_dob.selfencrypt", "_tide_dob.selfdecrypt", "_tide_cc.selfencrypt"])) }));
         return json({ ok: true });
       case "/api/updateUser": {
+        const r = guard("bid.submit");
+        if (!r.allow) return json({ ok: false, error: r.reason }, 403);
         let body = {};
         try { body = JSON.parse(init?.body || "{}"); } catch {}
         const attrs = body?.user?.attributes || {};
@@ -193,6 +270,8 @@ function createBackend(get, mutate) {
       if (!cr) return json({ error: "not found" }, 404);
       if (action === "approve") {
         if (body && body.requestModel) {
+          const r = guard("motion.sign", { label: `${cr.action} ${cr.role}` });
+          if (!r.allow) return json({ error: r.reason }, 403);
           mutate((x) => ({ ...x, requests: x.requests.map((r) => (r.id === id ? { ...r, readyToCommit: true } : r)) }));
           return json({ mode: "recorded" });
         }
@@ -203,6 +282,10 @@ function createBackend(get, mutate) {
         return json({});
       }
       // commit: apply the role change, then drop the request
+      {
+        const r = guard("motion.commit", { ready: !!cr.readyToCommit, label: `${cr.action} ${cr.role}` });
+        if (!r.allow) return json({ error: r.reason }, 403);
+      }
       mutate((x) => {
         const roles = cr.action === "GRANT"
           ? Array.from(new Set([...x.roles, cr.role]))
@@ -214,6 +297,10 @@ function createBackend(get, mutate) {
     m = pathname.match(/\/users\/[^/]+\/role-mappings\/realm$/);
     if (m && (method === "POST" || method === "DELETE")) {
       const list = Array.isArray(body) ? body : [];
+      {
+        const r = guard("motion.table", { label: `${method === "POST" ? "GRANT" : "REVOKE"} ${list.map((l) => l.name).join(",")}` });
+        if (!r.allow) return json({ error: r.reason }, 403);
+      }
       mutate((x) => {
         let next = x.nextReq;
         const added = list.map((r) => ({
@@ -301,8 +388,36 @@ export function PreviewAuthProvider({ Context, children }) {
   }, []);
   const get = useCallback(() => stRef.current, []);
 
+  const logAccess = useCallback((entry) => {
+    const e = { t: nowStr(), persona: stRef.current.persona || "anonymous", ...entry };
+    mutate((x) => ({ ...x, log: [e, ...(x.log || [])].slice(0, 50) }));
+  }, [mutate]);
+
+  // Runs the simulated policy check AND records it in the access log.
+  const guard = useCallback((action, extra = {}) => {
+    const cur = stRef.current;
+    const r = checkAccess(action, { persona: cur.persona, vendorRoles: cur.roles, phase: phaseOf(cur.roles), ...extra });
+    logAccess({ action: extra.label ? `${action} (${extra.label})` : action, result: r.allow ? "ALLOW" : "DENY", reason: r.reason, rule: r.rule });
+    return r;
+  }, [logAccess]);
+
   const backendRef = useRef(null);
-  if (!backendRef.current) backendRef.current = createBackend(get, mutate);
+  if (!backendRef.current) backendRef.current = createBackend(get, mutate, guard);
+
+  const pathname = usePathname();
+  const lastLogged = useRef("");
+  const personaNow = st.persona;
+  useEffect(() => {
+    if (!ready || !personaNow) return;
+    const denied = new URLSearchParams(window.location.search).get("denied");
+    const key = `${personaNow}|${pathname}|${denied || ""}`;
+    if (lastLogged.current === key) return;
+    lastLogged.current = key;
+    if (pathname === "/home" && denied) guard(`open:/${denied}`, { label: "blocked by server-side check" });
+    else if (pathname.startsWith("/user")) guard("open:/user");
+    else if (pathname.startsWith("/admin")) guard("open:/admin");
+    else if (pathname.startsWith("/databaseExposure")) guard("open:/databaseExposure");
+  }, [ready, personaNow, pathname, guard]);
 
   // Set during render so they are in place before child effects run
   if (typeof window !== "undefined") {
@@ -311,7 +426,9 @@ export function PreviewAuthProvider({ Context, children }) {
   }
 
   useEffect(() => {
-    const loaded = loadState();
+    let loaded = loadState();
+    const cp = readPersonaCookie();
+    if (cp !== loaded.persona) loaded = { ...loaded, persona: cp }; // cookie is the source of truth (middleware reads it)
     stRef.current = loaded;
     setSt(loaded);
     saveState(loaded);
@@ -319,16 +436,21 @@ export function PreviewAuthProvider({ Context, children }) {
     setReady(true);
   }, []);
 
-  const hasRole = (role) => stRef.current.roles.includes(role);
+  // _tide_* envelope roles belong to Vendor A. The committee page (procurement) needs to see them as the
+  // motion target, so it gets a read-only view; every other persona sees none.
+  const hasRole = (role) => {
+    const cur = stRef.current;
+    if (role.startsWith("_tide_")) return (cur.persona === "vendor" || cur.persona === "procurement") && cur.roles.includes(role);
+    return !!PERSONAS[cur.persona]?.realmRoles.includes(role);
+  };
 
   const doEncrypt = async (items) => {
     await sleep(600);
     const out = [];
     for (const it of items) {
       const tag = it.tags?.[0];
-      if (!stRef.current.roles.includes(`_tide_${tag}.selfencrypt`)) {
-        throw new Error(`Preview: missing role _tide_${tag}.selfencrypt, cannot encrypt.`);
-      }
+      const r = guard(`encrypt:${tag}`);
+      if (!r.allow) throw new Error(`Preview: ${r.reason}; cannot encrypt.`);
     }
     for (const it of items) {
       const tag = it.tags[0];
@@ -345,10 +467,11 @@ export function PreviewAuthProvider({ Context, children }) {
     for (const it of items) {
       const tag = it.tags?.[0];
       const cur = stRef.current;
-      if (cur.roles.includes(`_tide_${tag}.selfdecrypt`) && it.encrypted === cur.ct[tag]) {
+      const r = guard(`decrypt:${tag}`, { foreign: it.encrypted !== cur.ct[tag] });
+      if (r.allow) {
         out.push(cur.plain[tag]);
       } else {
-        throw new Error(`Preview: cannot decrypt (no _tide_${tag}.selfdecrypt role or not an envelope this session can open).`);
+        throw new Error(`Preview: cannot decrypt (${r.reason}).`);
       }
     }
     return out;
@@ -362,7 +485,39 @@ export function PreviewAuthProvider({ Context, children }) {
   const noop = async () => {};
   const hasOneRole = (role) => hasRole(role);
 
+  const switchPersona = () => {
+    setPersonaCookie(null);
+    mutate((x) => ({ ...x, persona: null }));
+    window.location.href = "/";
+  };
+
+  // SIMULATED: AI agent asks for opened prices; policy decides.
+  const readOpenedPrice = () => {
+    const r = guard("ai.readPrices");
+    if (!r.allow) return { ...r, prices: null };
+    const cur = stRef.current;
+    const prices = Object.entries(VENDORS).map(([key, v]) => ({
+      key,
+      name: v.name,
+      price: v.you ? Number(String(cur.plain.cc).replace(/[^0-9]/g, "")) || null : v.priceVND,
+      deliveryDays: v.you ? Number(cur.plain.dob) || null : v.deliveryDays,
+    }));
+    return { ...r, prices };
+  };
+
+  const preview = {
+    persona: st.persona,
+    personaLabel: PERSONAS[st.persona]?.label || null,
+    vendorRoles: st.roles,
+    tenderPhase: phaseOf(st.roles),
+    accessLog: st.log || [],
+    logAccess,
+    switchPersona,
+    readOpenedPrice,
+  };
+
   const value = {
+    preview,
     // state
     authenticated: ready,
     isInitializing: false,
@@ -376,7 +531,7 @@ export function PreviewAuthProvider({ Context, children }) {
     // roles
     hasOneRole,
     hasRealmRole: hasRole,
-    hasClientRole: (role) => (role === "tide-realm-admin" ? stRef.current.isAdmin : false),
+    hasClientRole: (role) => (role === "tide-realm-admin" ? stRef.current.isAdmin && stRef.current.persona === "procurement" : false),
     // tokens
     getValueFromToken: (key) => (key === "vuid" ? VUID : key === "preferred_username" ? "demouser" : undefined),
     getValueFromIdToken: (key) => (key === "dob" ? stRef.current.ct.dob : key === "cc" ? stRef.current.ct.cc : key === "vuid" ? VUID : undefined),
@@ -393,7 +548,7 @@ export function PreviewAuthProvider({ Context, children }) {
     forceUpdateToken: noop,
     // session
     login: () => { window.location.href = "/home"; },
-    logout: () => { window.location.href = "/"; },
+    logout: () => { setPersonaCookie(null); window.location.href = "/"; },
     secureFetch: backendRef.current.secureFetch,
     _previewVersion: st,
   };
@@ -406,23 +561,36 @@ export function PreviewAuthProvider({ Context, children }) {
   );
 }
 
-/** Simple landing card shown at "/" in preview mode. */
+/** Simulated Tide enclave sign-in shown at "/" in preview mode. */
 export function PreviewLanding() {
   const [clearing, setClearing] = useState(false);
+  const pick = (id) => {
+    const s = loadState();
+    saveState({ ...s, persona: id });
+    setPersonaCookie(id);
+    window.location.href = "/home";
+  };
   return (
     <main className="flex-grow w-full pt-6 pb-16">
       <div className="w-full px-8 max-w-screen-md mx-auto">
         <div className="glass-strong glow-gold p-8 space-y-4">
           <div className="text-xl font-bold tracking-tight text-gradient-gold">🔒 Sealed Tender</div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-100">Preview mode</h2>
-          <p>
-            The Tide network is not used here. Login, encryption and committee approvals are all simulated locally in your browser so you can click through every screen.
+          <h2 className="text-3xl font-bold tracking-tight text-slate-100">Sign in with Tide <span className="text-base font-semibold text-amber-300">· simulated</span></h2>
+          <p className="text-sm italic text-gray-600">Đăng nhập Tide · mô phỏng</p>
+          <p className="text-sm text-slate-300">
+            The Tide network is not used here. Pick who you are: the app then enforces that persona's roles with simulated policy checks, and every allow/deny is logged on the Tender Board.
           </p>
-          <p className="text-sm italic text-gray-600">Chế độ xem trước: mọi thứ được mô phỏng cục bộ.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {Object.values(PERSONAS).map((p) => (
+              <button key={p.id} type="button" onClick={() => pick(p.id)} className="glass text-left p-4 transition hover:bg-white/10 hover:shadow-[0_0_24px_rgba(245,196,81,0.25)]">
+                <div className="font-semibold text-slate-100">{p.label}</div>
+                <div className="text-xs italic text-gray-500">{p.vi}</div>
+                <div className="mt-2 text-xs text-slate-400">{p.blurb}</div>
+                <div className="mt-2 text-xs font-mono text-amber-300">roles: {p.realmRoles.join(", ")}</div>
+              </button>
+            ))}
+          </div>
           <div className="flex items-center gap-4">
-            <Link href="/home" className="btn-gold">
-              Enter preview
-            </Link>
             <button
               type="button"
               disabled={clearing}

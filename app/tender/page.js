@@ -41,10 +41,12 @@ export default function TenderBoard() {
   const auth = useAuth();
   const { authenticated, contextLoading } = auth;
 
+  const pv = auth.preview; // simulated-persona layer; undefined in real mode
+  const isVendorView = !pv || pv.persona === "vendor";
   const canWritePrice = !!auth.hasOneRole("_tide_cc.selfencrypt");
-  const canReadPrice = !!auth.hasOneRole("_tide_cc.selfdecrypt");
-  const canReadTech = !!auth.hasOneRole("_tide_dob.selfdecrypt");
-  const phase = canReadPrice ? 3 : canWritePrice ? 1 : 2;
+  const canReadPrice = !!auth.hasOneRole("_tide_cc.selfdecrypt") && isVendorView;
+  const canReadTech = !!auth.hasOneRole("_tide_dob.selfdecrypt") && isVendorView;
+  const phase = pv ? pv.tenderPhase : canReadPrice ? 3 : canWritePrice ? 1 : 2;
 
   const ccClaim = contextLoading ? undefined : auth.getValueFromIdToken("cc");
   const dobClaim = contextLoading ? undefined : auth.getValueFromIdToken("dob");
@@ -52,6 +54,8 @@ export default function TenderBoard() {
   const [techA, setTechA] = useState(null);
   const [priceA, setPriceA] = useState(null);
   const [decryptFailed, setDecryptFailed] = useState(false);
+  const [aiResult, setAiResult] = useState(null); // simulated AI evaluator output
+  const aiPrices = pv && pv.persona === "ai" && phase === 3 && aiResult && aiResult.allow ? aiResult.prices : null;
 
   // Decrypt Vendor A's real envelopes once the auth context is ready
   useEffect(() => {
@@ -65,7 +69,7 @@ export default function TenderBoard() {
         items.push({ encrypted: dobClaim, tags: ["dob"] });
         keys.push("tech");
       }
-      if (phase === 3 && looksEncrypted(ccClaim)) {
+      if (phase === 3 && isVendorView && looksEncrypted(ccClaim)) {
         items.push({ encrypted: ccClaim, tags: ["cc"] });
         keys.push("price");
       }
@@ -89,7 +93,7 @@ export default function TenderBoard() {
     })();
 
     return () => { cancelled = true; };
-  }, [contextLoading, authenticated, phase, canReadTech, ccClaim, dobClaim]);
+  }, [contextLoading, authenticated, phase, canReadTech, ccClaim, dobClaim, isVendorView]);
 
   if (contextLoading) return <LoadingSquareFullPage />;
 
@@ -104,6 +108,7 @@ export default function TenderBoard() {
   // Build rows
   const simSnippets = {};
   let si = 0;
+  const showOthers = phase === 3 && !(pv && pv.persona === "ai" && !aiPrices);
   const rows = Object.entries(VENDORS).map(([key, v]) => {
     if (v.you) {
       const submitted = looksEncrypted(ccClaim);
@@ -119,7 +124,10 @@ export default function TenderBoard() {
       let priceStatus = "sealed";
       if (!submitted) priceStatus = "none";
       else if (phase === 3) {
-        if (priceA != null) { price = priceA; priceStatus = "open"; }
+        const aiA = aiPrices ? aiPrices.find((p) => p.key === key) : null;
+        if (aiA && aiA.price != null) { price = aiA.price; priceStatus = "open"; }
+        else if (!isVendorView) priceStatus = "sealed";
+        else if (priceA != null) { price = priceA; priceStatus = "open"; }
         else if (decryptFailed) priceStatus = "failed";
         else priceStatus = "pending";
       }
@@ -134,10 +142,10 @@ export default function TenderBoard() {
     const snippet = FAKE_SNIPPETS[si++ % FAKE_SNIPPETS.length];
     return {
       key, v, you: false, tech: `${v.deliveryDays} days`, techSealed: false,
-      price: phase === 3 ? v.priceVND : null,
-      priceStatus: phase === 3 ? "open" : "sealed",
+      price: showOthers ? v.priceVND : null,
+      priceStatus: showOthers ? "open" : "sealed",
       snippet,
-      priceNum: phase === 3 ? v.priceVND : null,
+      priceNum: showOthers ? v.priceVND : null,
     };
   });
 
@@ -153,6 +161,19 @@ export default function TenderBoard() {
     const first = ordered.find((r) => r.priceNum != null);
     lowestKey = first ? first.key : null;
   }
+
+  const requestPrices = () => {
+    const r = pv.readOpenedPrice();
+    if (!r.allow) { setAiResult({ allow: false, reason: r.reason, rule: r.rule }); return; }
+    const ranked = [...r.prices].filter((p) => p.price).sort((a, b) => a.price - b.price);
+    const best = ranked[0];
+    const worst = ranked[ranked.length - 1];
+    const avg = ranked.reduce((t, p) => t + p.price, 0) / (ranked.length || 1);
+    const summary = best
+      ? `Ranked ${ranked.length} bids by price: ${ranked.map((p, i) => `${i + 1}. ${p.name} (${formatVND(p.price)})`).join("; ")}. Lowest is ${best.name} at ${(((best.price - estimate) / estimate) * 100).toFixed(1)}% vs the buyer's estimate; the spread to the highest (${worst.name}) is ${formatVND(worst.price - best.price)}, and the mean bid is ${formatVND(Math.round(avg))}. Recommendation: shortlist ${best.name} subject to technical review.`
+      : "No priced bids were available.";
+    setAiResult({ allow: true, prices: r.prices, reason: r.reason, rule: r.rule, summary });
+  };
 
   return (
     <main className="flex-grow w-full pt-6 pb-16">
@@ -319,10 +340,24 @@ export default function TenderBoard() {
           {/* Who tried to break the rules */}
           <TiltCard className="p-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Who tried to break the rules</h2>
-              <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">illustrative</span>
+              <h2 className="text-xl font-bold text-gray-900">{pv ? "Access log" : "Who tried to break the rules"}</h2>
+              <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">{pv ? "live · simulated policy" : "illustrative"}</span>
             </div>
-            <Vi>Ai đã thử phá luật</Vi>
+            <Vi>{pv ? "Nhật ký truy cập (mô phỏng)" : "Ai đã thử phá luật"}</Vi>
+            {pv ? (
+              <ul className="mt-3 max-h-80 space-y-2 overflow-y-auto text-xs">
+                {pv.accessLog.length === 0 && <li className="italic text-gray-500">No checks yet. Act as a persona and entries appear here.</li>}
+                {pv.accessLog.map((e, i) => (
+                  <li key={i} className={`border-l-4 pl-3 ${e.result === "ALLOW" ? "border-emerald-400" : "border-rose-400"}`}>
+                    <span className={`mr-2 rounded-full px-2 py-0.5 font-semibold ${e.result === "ALLOW" ? "bg-emerald-400/20 text-emerald-300" : "bg-rose-400/20 text-rose-300"}`}>{e.result}</span>
+                    <span className="text-gray-500">{e.t}</span> <span className="font-semibold text-gray-800">{e.persona}</span>{" "}
+                    <span className="font-mono text-gray-700">{e.action}</span>
+                    <div className="text-gray-600">{e.reason}</div>
+                    {e.rule && <div className="italic text-gray-500">rule: {e.rule}</div>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
             <ul className="mt-3 space-y-3 text-sm">
               {ATTEMPTS.map((a) => (
                 <li key={a.who} className="border-l-4 border-red-300 pl-3">
@@ -332,6 +367,7 @@ export default function TenderBoard() {
                 </li>
               ))}
             </ul>
+            )}
           </TiltCard>
 
           {/* Why this can't be rigged */}
@@ -348,6 +384,29 @@ export default function TenderBoard() {
             </p>
           </TiltCard>
         </div>
+
+        {pv && pv.persona === "ai" && (
+          <section className="glass p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold tracking-tight text-slate-100">AI evaluator</h2>
+              <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">simulated AI</span>
+            </div>
+            <Vi>Tác tử AI chấm thầu (mô phỏng)</Vi>
+            <button type="button" onClick={requestPrices} className="btn-gold mt-3">Request bid prices</button>
+            {aiResult && !aiResult.allow && (
+              <p className="mt-3 rounded-xl border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+                DENY: {aiResult.reason}. <span className="italic">rule: {aiResult.rule}</span>
+              </p>
+            )}
+            {aiResult && aiResult.allow && (
+              <div className="mt-3 rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">
+                <p className="font-semibold">ALLOW: {aiResult.reason}</p>
+                <p className="mt-1">{aiResult.summary}</p>
+                <p className="mt-1 text-xs italic text-emerald-300">Generated locally by the simulated AI from the opened prices. No model was called.</p>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Navigation buttons */}
         <div className="flex flex-wrap gap-3">

@@ -681,6 +681,30 @@ export default function Admin() {
       }
     };
 
+    // Presentation-only summary of the draft compared with committed token roles.
+    const motionPreview = [];
+    if (isTideAdmin) {
+      const envelopes = [
+        { name: "technical", read: hasDobReadPerm, write: hasDobWritePerm,
+          currentRead: auth.hasOneRole("_tide_dob.selfdecrypt"), currentWrite: auth.hasOneRole("_tide_dob.selfencrypt") },
+        { name: "financial", read: hasCcReadPerm, write: hasCcWritePerm,
+          currentRead: auth.hasOneRole("_tide_cc.selfdecrypt"), currentWrite: auth.hasOneRole("_tide_cc.selfencrypt") },
+      ];
+      const closing = envelopes.filter(envelope => envelope.currentWrite && !envelope.write);
+      const extending = envelopes.filter(envelope => !envelope.currentWrite && envelope.write);
+      if (closing.length) {
+        motionPreview.push(closing.length === 2 ? "Close submissions" : `Close ${closing[0].name} submissions`);
+      }
+      if (extending.length) {
+        motionPreview.push(extending.length === 2 ? "Extend deadline for Vendor A" : `Extend ${extending[0].name} deadline for Vendor A`);
+      }
+      envelopes.forEach(envelope => {
+        if (envelope.read !== envelope.currentRead) {
+          motionPreview.push(envelope.read ? `Open ${envelope.name} envelopes` : `Remove access to ${envelope.name} envelopes`);
+        }
+      });
+    }
+
     return (
       !loading
       ?
@@ -756,7 +780,69 @@ export default function Admin() {
                   >
                     <div className="border rounded-lg p-6 bg-white shadow-sm space-y-6">
                       <h4 className="text-xl font-bold text-gray-800">Motion: Vendor A's envelopes</h4>
-                      <p className="text-sm text-gray-600">Revoke Write to close submissions. Re-grant Write after the deadline to extend it - the classic bid-rigging favour also needs 3 of 5 signatures. Grant Read to open the financial envelopes.</p>
+                      <p className="text-sm text-gray-600">Choose a tender motion, then table it for 3 of 5 committee signatures.</p>
+
+                      <div className="grid gap-4 sm:grid-cols-3">
+                        <button
+                          type="button"
+                          aria-pressed={!hasDobWritePerm && !hasCcWritePerm}
+                          onClick={() => {
+                            setHasDobWritePerm(false);
+                            setHasCcWritePerm(false);
+                            setHasChanges(true);
+                          }}
+                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${!hasDobWritePerm && !hasCcWritePerm ? "glow-gold" : ""}`}
+                        >
+                          <span className="block font-semibold text-gray-800">Close submissions</span>
+                          <Vi>Đóng nhận hồ sơ</Vi>
+                          <span className="mt-3 block text-sm text-gray-600">Stop accepting changes to both envelopes.</span>
+                          {!hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-semibold text-amber-300">Selected</span>}
+                        </button>
+                        <button
+                          type="button"
+                          aria-pressed={hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm}
+                          onClick={() => {
+                            setHasCcReadPerm(true);
+                            setHasDobWritePerm(false);
+                            setHasCcWritePerm(false);
+                            setHasChanges(true);
+                          }}
+                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm ? "glow-gold" : ""}`}
+                        >
+                          <span className="block font-semibold text-gray-800">Open financial envelopes</span>
+                          <Vi>Mở túi tài chính</Vi>
+                          <span className="mt-3 block text-sm text-gray-600">Open bid prices and close submissions.</span>
+                          {hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-semibold text-amber-300">Selected</span>}
+                        </button>
+                        <div className="space-y-3">
+                          <button
+                            type="button"
+                            aria-pressed={hasDobWritePerm && hasCcWritePerm}
+                            aria-describedby="extend-deadline-note"
+                            onClick={() => {
+                              setHasDobWritePerm(true);
+                              setHasCcWritePerm(true);
+                              setHasChanges(true);
+                            }}
+                            className={`glass w-full p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${hasDobWritePerm && hasCcWritePerm ? "glow-gold" : ""}`}
+                          >
+                            <span className="block font-semibold text-gray-800">Extend deadline for Vendor A</span>
+                            <Vi>Gia hạn cho nhà thầu A</Vi>
+                            <span className="mt-3 block text-sm text-gray-600">Let Vendor A update both envelopes again.</span>
+                            {hasDobWritePerm && hasCcWritePerm && <span className="mt-3 block text-xs font-semibold text-amber-300">Selected</span>}
+                          </button>
+                          <p id="extend-deadline-note" className="text-xs text-rose-400">The classic bid-rigging favour. It still needs 3 of 5 signatures.</p>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-700" aria-live="polite" aria-atomic="true">
+                        <span className="font-semibold">Motion preview: </span>
+                        {motionPreview.length ? motionPreview.join(" · ") : "No envelope changes."}
+                      </p>
+
+                      <details className="glass p-4">
+                        <summary className="cursor-pointer text-sm font-semibold text-gray-700">Advanced: exact role changes (TideCloak <code>_tide_*</code> roles)</summary>
+                        <div className="mt-4 space-y-6">
 
                       {/* Date of Birth */}
                       <div>
@@ -787,6 +873,8 @@ export default function Admin() {
                           </label>
                         </div>
                       </div>
+                        </div>
+                      </details>
                     </div>
 
                     <div className="flex items-center gap-x-2">

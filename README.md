@@ -34,6 +34,8 @@ Vendor A seals a price nobody can reopen, not even Vendor A. The Insider View sh
 | Committee motions: draft, sign, commit, which change Vendor A's read/write roles | Real TideCloak governance. You sign as member #1; members 2–5 are simulated, as in the TideCloak playground |
 | Vendors B–E, their prices, and the "who tried to break the rules" panel | Simulated (synthetic data) |
 
+Where each TideCloak capability fits, including the next step (Forseti policy-governed decryption by the committee), is mapped in [docs/TIDECLOAK_PLAN.md](docs/TIDECLOAK_PLAN.md). That plan was produced with Tide's MCP.
+
 ## Pages
 
 - **Tender Board** (`/tender`): tender phases, the bids table, and the ranking once financial envelopes are opened.
