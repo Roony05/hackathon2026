@@ -778,8 +778,8 @@ export default function Admin() {
                     onChange={() => setHasChanges(true)}
                     className="space-y-6"
                   >
-                    <div className="border rounded-lg p-6 bg-white shadow-sm space-y-6">
-                      <h4 className="text-xl font-bold text-gray-800">Motion: Vendor A's envelopes</h4>
+                    <div className="border rounded-lg p-5 bg-white space-y-6">
+                      <h4 className="text-base font-semibold text-gray-800">Motion: Vendor A's envelopes</h4>
                       <p className="text-sm text-gray-600">Choose a tender motion, then table it for 3 of 5 committee signatures.</p>
 
                       <div className="grid gap-4 sm:grid-cols-3">
@@ -791,12 +791,12 @@ export default function Admin() {
                             setHasCcWritePerm(false);
                             setHasChanges(true);
                           }}
-                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${!hasDobWritePerm && !hasCcWritePerm ? "glow-gold" : ""}`}
+                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-200 ${!hasDobWritePerm && !hasCcWritePerm ? "!border-[#ededed]" : ""}`}
                         >
                           <span className="block font-semibold text-gray-800">Close submissions</span>
                           <Vi>Đóng nhận hồ sơ</Vi>
                           <span className="mt-3 block text-sm text-gray-600">Stop accepting changes to both envelopes.</span>
-                          {!hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-semibold text-amber-300">Selected</span>}
+                          {!hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
                         </button>
                         <button
                           type="button"
@@ -807,12 +807,12 @@ export default function Admin() {
                             setHasCcWritePerm(false);
                             setHasChanges(true);
                           }}
-                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm ? "glow-gold" : ""}`}
+                          className={`glass h-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-200 ${hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm ? "!border-[#ededed]" : ""}`}
                         >
                           <span className="block font-semibold text-gray-800">Open financial envelopes</span>
                           <Vi>Mở túi tài chính</Vi>
                           <span className="mt-3 block text-sm text-gray-600">Open bid prices and close submissions.</span>
-                          {hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-semibold text-amber-300">Selected</span>}
+                          {hasCcReadPerm && !hasDobWritePerm && !hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
                         </button>
                         <div className="space-y-3">
                           <button
@@ -824,12 +824,12 @@ export default function Admin() {
                               setHasCcWritePerm(true);
                               setHasChanges(true);
                             }}
-                            className={`glass w-full p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${hasDobWritePerm && hasCcWritePerm ? "glow-gold" : ""}`}
+                            className={`glass w-full p-4 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-200 ${hasDobWritePerm && hasCcWritePerm ? "!border-[#ededed]" : ""}`}
                           >
                             <span className="block font-semibold text-gray-800">Extend deadline for Vendor A</span>
                             <Vi>Gia hạn cho nhà thầu A</Vi>
                             <span className="mt-3 block text-sm text-gray-600">Let Vendor A update both envelopes again.</span>
-                            {hasDobWritePerm && hasCcWritePerm && <span className="mt-3 block text-xs font-semibold text-amber-300">Selected</span>}
+                            {hasDobWritePerm && hasCcWritePerm && <span className="mt-3 block text-xs font-medium text-neutral-100">Selected</span>}
                           </button>
                           <p id="extend-deadline-note" className="text-xs text-rose-400">The classic bid-rigging favour. It still needs 3 of 5 signatures.</p>
                         </div>

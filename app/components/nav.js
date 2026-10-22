@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { FaLock } from "react-icons/fa";
 import Button from "../components/button";
 import { useAuth } from "../context/AuthProvider";
 
@@ -32,10 +33,11 @@ export default function Nav() {
   const showAdmin = !pv || pv.persona === "procurement";
 
   return (
-    <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE === "1" ? 44 : 0 }} className="sticky z-40flex flex-wrap items-center gap-2 border-b border-white/10 bg-slate-950/70 px-6 py-3 backdrop-blur-xl shadow-[0_1px_24px_rgba(245,196,81,0.12)]">
+    <nav style={{ top: process.env.NEXT_PUBLIC_PREVIEW_MODE === "1" ? 32 : 0 }} className="sticky z-40 flex h-14 flex-wrap items-center gap-1 border-b border-[#1f1f1f] bg-[#0a0a0a]/80 px-6">
       {/* Logo → home page */}
-      <Link href="/home" className="inline-block">
-        <span className="mr-4 cursor-pointer text-xl font-bold tracking-tight text-gradient-gold">🔒 Sealed Tender</span>
+      <Link href="/home" className="mr-4 inline-flex items-center gap-2">
+        <FaLock className="h-3.5 w-3.5 text-neutral-100" />
+        <span className="cursor-pointer text-sm font-semibold tracking-tight text-neutral-100">Sealed Tender</span>
       </Link>
 
       <button
@@ -83,9 +85,9 @@ export default function Nav() {
       )}
 
       {pv && pv.persona && (
-        <span className="ml-auto flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-xs text-amber-200">
-          Signed in (simulated) as <strong>{pv.personaLabel}</strong>
-          <button type="button" onClick={() => pv.switchPersona()} className="rounded-full border border-amber-300/50 px-2 py-0.5 font-semibold hover:bg-amber-300/20">Switch</button>
+        <span className="ml-auto mr-2 flex items-center gap-2 rounded-md border border-[#1f1f1f] bg-[#111] px-2.5 py-1 text-xs text-neutral-400">
+          Signed in (simulated) as <strong className="font-medium text-neutral-100">{pv.personaLabel}</strong>
+          <button type="button" onClick={() => pv.switchPersona()} className="rounded border border-[#2e2e2e] px-1.5 py-0.5 font-medium text-neutral-200 hover:bg-[#1a1a1a]">Switch</button>
         </span>
       )}
 

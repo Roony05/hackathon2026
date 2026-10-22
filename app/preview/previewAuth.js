@@ -14,7 +14,7 @@ export const PREVIEW_REALM = "tidecloak-demo";
 const VUID = "preview-vuid";
 const USER_ID = "preview-user-1";
 const STORAGE_KEY = "sealedTenderPreviewState.v1";
-const BANNER_HEIGHT = 44;
+const BANNER_HEIGHT = 32;
 
 const OTHER_BLOBS = {
   "testuser1": {
@@ -359,13 +359,12 @@ function PreviewBanner() {
       <div
         style={{
           position: "fixed", top: 0, left: 0, right: 0, height: BANNER_HEIGHT, zIndex: 100000,
-          boxSizing: "border-box", padding: "3px 8px", textAlign: "center", lineHeight: 1.25,
-          background: "linear-gradient(90deg,#1a1405,#2b200a,#1a1405)", color: "#fde68a", borderBottom: "1px solid rgba(245,196,81,0.6)", boxShadow: "0 0 20px rgba(245,196,81,0.25)", backdropFilter: "blur(10px)",
-          fontSize: 12, fontWeight: 600, display: "flex", flexDirection: "column", justifyContent: "center",
+          boxSizing: "border-box", padding: "0 12px", background: "#111", borderBottom: "1px solid #1f1f1f",
+          color: "#a1a1a1", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
         }}
       >
-        <div>PREVIEW MODE — simulated locally, not connected to TideCloak</div>
-        <div style={{ fontWeight: 400, fontStyle: "italic" }}>CHẾ ĐỘ XEM TRƯỚC — mô phỏng, không kết nối TideCloak</div>
+        <span style={{ width: 6, height: 6, borderRadius: 999, background: "#fbbf24", flexShrink: 0 }} />
+        <span>Preview mode — simulated locally, not connected to TideCloak · Chế độ xem trước — mô phỏng</span>
       </div>
       <div style={{ height: BANNER_HEIGHT, flexShrink: 0 }} aria-hidden="true" />
     </>
@@ -571,36 +570,38 @@ export function PreviewLanding() {
     window.location.href = "/home";
   };
   return (
-    <main className="flex-grow w-full pt-6 pb-16">
-      <div className="w-full px-8 max-w-screen-md mx-auto">
-        <div className="glass-strong glow-gold p-8 space-y-4">
-          <div className="text-xl font-bold tracking-tight text-gradient-gold">🔒 Sealed Tender</div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-100">Sign in with Tide <span className="text-base font-semibold text-amber-300">· simulated</span></h2>
-          <p className="text-sm italic text-gray-600">Đăng nhập Tide · mô phỏng</p>
-          <p className="text-sm text-slate-300">
-            The Tide network is not used here. Pick who you are: the app then enforces that persona's roles with simulated policy checks, and every allow/deny is logged on the Tender Board.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {Object.values(PERSONAS).map((p) => (
-              <button key={p.id} type="button" onClick={() => pick(p.id)} className="glass text-left p-4 transition hover:bg-white/10 hover:shadow-[0_0_24px_rgba(245,196,81,0.25)]">
-                <div className="font-semibold text-slate-100">{p.label}</div>
-                <div className="text-xs italic text-gray-500">{p.vi}</div>
-                <div className="mt-2 text-xs text-slate-400">{p.blurb}</div>
-                <div className="mt-2 text-xs font-mono text-amber-300">roles: {p.realmRoles.join(", ")}</div>
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              disabled={clearing}
-              onClick={() => { setClearing(true); resetPreviewState(); window.location.reload(); }}
-              className="btn-ghost !px-4 !py-2 text-sm"
-            >
-              Reset demo state
-            </button>
-          </div>
+    <main className="flex-grow w-full px-4 py-12">
+      <div className="mx-auto w-full max-w-md space-y-4 rounded-lg border border-[#1f1f1f] bg-[#111] p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight text-neutral-100">Sign in with Tide</h2>
+          <span className="rounded-md border border-[#2e2e2e] px-2 py-0.5 text-xs text-neutral-400">simulated</span>
         </div>
+        <p className="text-xs italic text-neutral-500">Đăng nhập Tide · mô phỏng</p>
+        <p className="text-sm text-neutral-400">
+          The Tide network is not used here. Pick who you are: the app then enforces that persona's roles with simulated policy checks, and every allow/deny is logged on the Tender Board.
+        </p>
+        <div className="space-y-2">
+          {Object.values(PERSONAS).map((p) => (
+            <button key={p.id} type="button" onClick={() => pick(p.id)} className="block w-full rounded-lg border border-[#1f1f1f] bg-[#0a0a0a] p-3 text-left transition hover:border-[#3a3a3a]">
+              <div className="text-sm font-medium text-neutral-100">{p.label}</div>
+              <div className="text-xs italic text-neutral-500">{p.vi}</div>
+              <div className="mt-1 text-xs text-neutral-400">{p.blurb}</div>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {p.realmRoles.map((r) => (
+                  <span key={r} className="rounded bg-[#1a1a1a] px-1.5 py-0.5 font-mono text-[11px] text-neutral-400">{r}</span>
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          disabled={clearing}
+          onClick={() => { setClearing(true); resetPreviewState(); window.location.reload(); }}
+          className="btn-ghost !h-8 text-xs"
+        >
+          Reset demo state
+        </button>
       </div>
     </main>
   );

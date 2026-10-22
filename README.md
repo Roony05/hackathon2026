@@ -25,6 +25,8 @@ Vendor A seals a price nobody can reopen, not even Vendor A. The Insider View sh
 
 [demo.mp4](./demo.mp4) — 2 minutes.
 
+The video is recorded in **simulated TideCloak mode** (banner visible). On 22 Oct 2026, Tide's licence service returned `Midgard.FinalizeWallet 500` during realm setup, so TideCloak's sign-in, roles and access checks are simulated exactly where TideCloak enforces them; see [docs/TIDECLOAK_PLAN.md](docs/TIDECLOAK_PLAN.md). The same screens run on real TideCloak when `NEXT_PUBLIC_PREVIEW_MODE` is unset, which is the default.
+
 ## What is real and what is simulated
 
 | Part | Status |
@@ -55,7 +57,7 @@ To start again from a clean realm, run `bash reset-and-restart.sh` and restart t
 
 ### Offline preview (only if Tide's network is unavailable)
 
-Set `NEXT_PUBLIC_PREVIEW_MODE=1` in `.env` and restart `npm run dev` to click through every screen with **simulated** login, encryption and approvals. A permanent amber "PREVIEW MODE — simulated" banner is shown, and nothing talks to TideCloak. Preview mode is off by default; the prototype itself runs on real TideCloak.
+Set `NEXT_PUBLIC_PREVIEW_MODE=1` in `.env` and restart `npm run dev` to click through every screen with **simulated** login, encryption and approvals. You sign in as one of four personas (Vendor A, Procurement head, IT admin / DBA, AI evaluation agent). Each persona has its own roles, every protected action goes through an allow/deny check with a logged reason, and `middleware.js` applies a simulated server-side route check. A permanent amber "PREVIEW MODE — simulated" banner is shown, and nothing talks to TideCloak. Preview mode is off by default; the prototype itself runs on real TideCloak.
 
 ## Tóm tắt tiếng Việt
 

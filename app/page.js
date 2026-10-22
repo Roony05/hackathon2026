@@ -324,9 +324,9 @@ function Login() {
 </AccordionBox>
 
 
-              <div className="glass-strong glow-gold p-8 space-y-4">
-                <div className="text-xl font-bold tracking-tight text-gradient-gold">🔒 Sealed Tender</div>
-                <h2 className="text-3xl font-bold">
+              <div className="glass p-5 space-y-4">
+                <div className="text-sm font-semibold tracking-tight text-neutral-100">🔒 Sealed Tender</div>
+                <h2 className="text-2xl font-semibold tracking-tight">
                   Sealed bids that nobody can open early
                 </h2>
                 <p>
@@ -335,8 +335,8 @@ function Login() {
                   Bid fairly. Build trust. Sleep easy.
                 </p>
                 <hr className="my-6 border-t border-gray-200" />
-                <h3 className="text-xl font-semibold">Secure “BYOiD” Login</h3>
-                <p className="text-base">
+                <h3 className="text-base font-semibold">Secure “BYOiD” Login</h3>
+                <p className="text-sm text-neutral-400">
                   Log in as Vendor A - your password is never stored, shared, or exposed.
                 </p>
                 <Button onClick={handleLogin} className="hover:bg-red-700">

@@ -2,15 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
-import TiltCard from "../components/TiltCard";
 import { FaLock, FaCheckCircle, FaShieldAlt, FaKey, FaUsers, FaMicrochip } from "react-icons/fa";
 import { useAuth } from "../context/AuthProvider";
 import { LoadingSquareFullPage } from "../components/loadingSquare";
 import { TENDER, VENDORS, formatVND, Vi } from "../tenderStory";
-
-const Vault3D = dynamic(() => import("../components/Vault3D"), { ssr: false, loading: () => <div className="h-full w-full" /> });
 
 const STEPS = [
   { n: 1, label: "Bidding open", vi: "Đang nhận hồ sơ" },
@@ -175,154 +170,146 @@ export default function TenderBoard() {
     setAiResult({ allow: true, prices: r.prices, reason: r.reason, rule: r.rule, summary });
   };
 
+  const chip = "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium";
+  const sealedChip = (
+    <span className={chip + " border border-[#2e2e2e] bg-[#1a1a1a] text-neutral-300"}>🔒 Sealed</span>
+  );
+  const card = "rounded-lg border border-[#1f1f1f] bg-[#111] p-5";
+
   return (
-    <main className="flex-grow w-full pt-6 pb-16">
+    <main className="flex-grow w-full pt-8 pb-16">
       <div className="container mx-auto max-w-screen-lg px-4 space-y-6">
 
-        {/* Header card */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="glass-strong grid gap-6 p-6 md:grid-cols-[1fr_280px]">
-          <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-amber-300">Tender {TENDER.id}</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-100">{TENDER.title}</h1>
+        {/* Header */}
+        <section className={card}>
+          <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">Tender {TENDER.id}</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-100">{TENDER.title}</h1>
           <Vi>{TENDER.titleVi}</Vi>
-          <dl className="mt-4 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+          <dl className="mt-5 grid gap-x-8 gap-y-4 border-t border-[#1f1f1f] pt-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <dt className="text-gray-500">Buyer</dt>
-              <dd className="font-medium text-gray-800">{TENDER.buyer}</dd>
+              <dt className="text-xs text-neutral-500">Buyer</dt>
+              <dd className="mt-0.5 text-neutral-200">{TENDER.buyer}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Method</dt>
-              <dd className="font-medium text-gray-800">{TENDER.method}</dd>
+              <dt className="text-xs text-neutral-500">Method</dt>
+              <dd className="mt-0.5 text-neutral-200">{TENDER.method}</dd>
               <Vi>{TENDER.methodVi}</Vi>
             </div>
             <div>
-              <dt className="text-gray-500">Estimate</dt>
-              <dd className="font-medium text-gray-800">{formatVND(TENDER.estimateVND)}</dd>
+              <dt className="text-xs text-neutral-500">Estimate</dt>
+              <dd className="mt-0.5 tabular-nums text-neutral-200">{formatVND(TENDER.estimateVND)}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Submission deadline</dt>
-              <dd className="font-medium text-gray-800">{TENDER.deadline}</dd>
+              <dt className="text-xs text-neutral-500">Submission deadline</dt>
+              <dd className="mt-0.5 text-neutral-200">{TENDER.deadline}</dd>
             </div>
-            <div className="sm:col-span-2">
-              <dt className="text-gray-500">Rule changes need</dt>
-              <dd className="font-medium text-gray-800">
+            <div>
+              <dt className="text-xs text-neutral-500">Rule changes need</dt>
+              <dd className="mt-0.5 text-neutral-200">
                 {TENDER.quorum.required} of {TENDER.quorum.total} committee signatures
               </dd>
             </div>
           </dl>
-          </div>
-          <div className={`h-[260px] overflow-hidden rounded-2xl border border-white/10 bg-black/20 ${phase === 3 ? "glow-emerald" : "glow-gold"}`}>
-            <Vault3D state={phase === 3 ? "open" : "sealed"} signatures={phase === 3 ? 3 : phase === 2 ? 3 : 1} className="h-full w-full" />
-          </div>
-        </motion.section>
+        </section>
 
         {/* Phase stepper */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="glass p-6">
-          <h2 className="text-xl font-bold tracking-tight text-slate-100">Tender phase</h2>
+        <section className={card}>
+          <h2 className="text-base font-semibold tracking-tight text-neutral-100">Tender phase</h2>
           <Vi>Giai đoạn đấu thầu (suy ra từ vai trò thật trong TideCloak)</Vi>
-          <ol className="mt-4 grid gap-4 md:grid-cols-3">
-            {STEPS.map((s) => {
+          <ol className="mt-5 grid gap-4 md:grid-cols-3">
+            {STEPS.map((s, idx) => {
               const active = s.n === phase;
               const done = s.n < phase;
               return (
-                <li
-                  key={s.n}
-                  className={`rounded-2xl border p-4 ${
-                    active
-                      ? (s.n === 3 ? "glow-emerald bg-emerald-400/10" : "glow-gold bg-amber-300/10")
-                      : done
-                      ? "border-emerald-400/40 bg-emerald-400/10"
-                      : "border-white/10 bg-white/5 opacity-60"
-                  }`}
-                >
+                <li key={s.n} className="relative">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
-                        active ? (s.n === 3 ? "bg-emerald-400 text-slate-900 shadow-[0_0_14px_rgba(52,211,153,0.7)]" : "bg-amber-400 text-slate-900 shadow-[0_0_14px_rgba(245,196,81,0.7)]") : done ? "bg-emerald-500 text-slate-900" : "bg-white/15 text-slate-300"
+                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                        active ? "bg-white" : done ? "bg-emerald-400" : "bg-[#2e2e2e]"
                       }`}
-                    >
-                      {done ? <FaCheckCircle /> : s.n}
-                    </span>
-                    <span className="font-semibold text-gray-900">{s.label}</span>
+                    />
+                    <span className={`h-px flex-1 ${idx === STEPS.length - 1 ? "bg-transparent" : done ? "bg-emerald-400/40" : "bg-[#1f1f1f]"}`} />
                   </div>
-                  <Vi>{s.vi}</Vi>
-                  {active && <p className={`mt-2 text-xs font-semibold uppercase tracking-wide ${s.n === 3 ? "text-emerald-300" : "text-amber-300"}`}>Current phase</p>}
-                  <p className="mt-2 text-xs text-gray-600">
-                    Changing steps requires a committee motion with 3/5 signatures.{" "}
-                    <Link href="/admin" className="text-blue-600 underline">Tender Committee</Link>
-                  </p>
+                  <div className="mt-2 pr-4">
+                    <span className={`flex items-center gap-1.5 text-sm font-medium ${active ? "text-white" : done ? "text-neutral-300" : "text-neutral-500"}`}>
+                      {done && <FaCheckCircle className="h-3 w-3 text-emerald-400" />}
+                      {s.label}
+                    </span>
+                    <Vi>{s.vi}</Vi>
+                    {active && <p className="mt-1 text-xs font-medium text-neutral-300">Current phase</p>}
+                  </div>
                 </li>
               );
             })}
           </ol>
-        </motion.section>
+          <p className="mt-5 border-t border-[#1f1f1f] pt-4 text-xs text-neutral-500">
+            Changing steps requires a committee motion with 3/5 signatures.{" "}
+            <Link href="/admin" className="text-neutral-300 underline underline-offset-2">Tender Committee</Link>
+          </p>
+        </section>
 
         {/* Bids table */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="glass p-6">
-          <h2 className="text-xl font-bold tracking-tight text-slate-100">Bids</h2>
+        <section className={card}>
+          <h2 className="text-base font-semibold tracking-tight text-neutral-100">Bids</h2>
           <Vi>Hồ sơ dự thầu</Vi>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full overflow-hidden rounded-xl text-left text-sm">
+            <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-gray-600">
-                  <th className="py-2 pr-4 font-semibold">Vendor</th>
-                  <th className="py-2 pr-4 font-semibold">Technical envelope<span className="block text-xs font-normal text-gray-500">Delivery time</span></th>
-                  <th className="py-2 pr-4 font-semibold">Financial envelope<span className="block text-xs font-normal text-gray-500">Bid price</span></th>
-                  <th className="py-2 font-semibold">Status</th>
+                <tr className="border-b border-[#1f1f1f] text-xs uppercase tracking-wider text-neutral-500">
+                  <th className="py-2 pr-4 font-medium">Vendor</th>
+                  <th className="py-2 pr-4 font-medium">Technical envelope<span className="block text-[11px] font-normal normal-case tracking-normal">Delivery time</span></th>
+                  <th className="py-2 pr-4 font-medium">Financial envelope<span className="block text-[11px] font-normal normal-case tracking-normal">Bid price</span></th>
+                  <th className="py-2 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {ordered.map((r) => {
                   const isLowest = phase === 3 && r.key === lowestKey;
                   return (
-                    <tr key={r.key} className={`border-b border-white/5 align-top transition hover:bg-white/5 ${isLowest ? "bg-emerald-400/10 shadow-[inset_0_0_30px_rgba(52,211,153,0.18)]" : ""}`}>
+                    <tr key={r.key} className="border-b border-[#1f1f1f] align-top transition-colors hover:bg-[#161616]">
                       <td className="py-3 pr-4">
-                        <div className="font-medium text-gray-900">{r.v.name}</div>
+                        <div className="font-medium text-neutral-100">{r.v.name}</div>
                         {r.you && <Vi>{r.v.nameVi}</Vi>}
-                        <span
-                          className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                            r.you ? "bg-blue-100 text-blue-800" : "bg-gray-200 text-gray-700"
-                          }`}
-                        >
+                        <span className={chip + " mt-1 " + (r.you ? "bg-[#1a1a1a] text-neutral-200" : "bg-[#1a1a1a] text-neutral-500")}>
                           {r.you ? "real · TideCloak-encrypted" : "simulated"}
                         </span>
                       </td>
                       <td className="py-3 pr-4">
                         {r.techSealed ? (
-                          <div>
-                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-300/10 px-2 py-0.5 text-xs font-semibold text-amber-300">🔒 Sealed</span>
-                            <div className="break-all font-mono text-xs text-gray-400">{r.techSnippet}</div>
+                          <div className="space-y-1">
+                            {sealedChip}
+                            <div className="break-all font-mono text-xs text-neutral-500">{r.techSnippet}</div>
                           </div>
                         ) : (
-                          <span className={r.tech === COULDNT || r.tech === NOT_SUBMITTED ? "text-gray-500 italic" : "text-gray-900"}>{r.tech}</span>
+                          <span className={r.tech === COULDNT || r.tech === NOT_SUBMITTED ? "italic text-neutral-500" : "tabular-nums text-neutral-200"}>{r.tech}</span>
                         )}
                       </td>
                       <td className="py-3 pr-4">
                         {r.priceStatus === "open" && (
                           <div>
-                            <div className="font-semibold text-emerald-300">{formatVND(r.price)}</div>
-                            <div className="text-xs text-gray-500">{pct(r.price)}</div>
+                            <div className="font-medium tabular-nums text-neutral-100">{formatVND(r.price)}</div>
+                            <div className="text-xs tabular-nums text-neutral-500">{pct(r.price)}</div>
                           </div>
                         )}
                         {r.priceStatus === "sealed" && (
-                          <div>
-                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-300/10 px-2 py-0.5 text-xs font-semibold text-amber-300">🔒 Sealed</span>
-                            <div className="break-all font-mono text-xs text-gray-400">{r.snippet}</div>
+                          <div className="space-y-1">
+                            {sealedChip}
+                            <div className="break-all font-mono text-xs text-neutral-500">{r.snippet}</div>
                           </div>
                         )}
-                        {r.priceStatus === "none" && <span className="italic text-gray-500">{NOT_SUBMITTED}</span>}
-                        {r.priceStatus === "failed" && <span className="italic text-gray-500">{COULDNT}</span>}
-                        {r.priceStatus === "pending" && <span className="text-gray-400">…</span>}
+                        {r.priceStatus === "none" && <span className="italic text-neutral-500">{NOT_SUBMITTED}</span>}
+                        {r.priceStatus === "failed" && <span className="italic text-neutral-500">{COULDNT}</span>}
+                        {r.priceStatus === "pending" && <span className="text-neutral-500">…</span>}
                       </td>
                       <td className="py-3">
                         {isLowest ? (
-                          <span className="inline-block rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">Lowest evaluated price</span>
+                          <span className={chip + " bg-emerald-500/10 text-emerald-400"}>Lowest</span>
                         ) : r.priceStatus === "open" ? (
-                          <span className="text-gray-700">Opened</span>
+                          <span className="text-neutral-300">Opened</span>
                         ) : r.priceStatus === "none" ? (
-                          <span className="text-gray-500">No bid</span>
+                          <span className="text-neutral-500">No bid</span>
                         ) : (
-                          <span className="text-gray-700">Sealed</span>
+                          <span className="text-neutral-400">Sealed</span>
                         )}
                       </td>
                     </tr>
@@ -332,77 +319,77 @@ export default function TenderBoard() {
             </table>
           </div>
           {phase === 3 && (
-            <p className="mt-3 text-xs text-gray-500">Sorted by price, lowest first. Percentages are relative to the buyer's estimate of {formatVND(estimate)}.</p>
+            <p className="mt-3 text-xs text-neutral-500">Sorted by price, lowest first. Percentages are relative to the buyer's estimate of {formatVND(estimate)}.</p>
           )}
-        </motion.section>
+        </section>
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Who tried to break the rules */}
-          <TiltCard className="p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">{pv ? "Access log" : "Who tried to break the rules"}</h2>
-              <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">{pv ? "live · simulated policy" : "illustrative"}</span>
+          <div className={card}>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-base font-semibold tracking-tight text-neutral-100">{pv ? "Access log" : "Who tried to break the rules"}</h2>
+              <span className={chip + " shrink-0 bg-amber-500/10 text-amber-400"}>{pv ? "live · simulated policy" : "illustrative"}</span>
             </div>
             <Vi>{pv ? "Nhật ký truy cập (mô phỏng)" : "Ai đã thử phá luật"}</Vi>
             {pv ? (
-              <ul className="mt-3 max-h-80 space-y-2 overflow-y-auto text-xs">
-                {pv.accessLog.length === 0 && <li className="italic text-gray-500">No checks yet. Act as a persona and entries appear here.</li>}
+              <ul className="mt-3 max-h-80 divide-y divide-[#1f1f1f] overflow-y-auto text-xs">
+                {pv.accessLog.length === 0 && <li className="py-2 italic text-neutral-500">No checks yet. Act as a persona and entries appear here.</li>}
                 {pv.accessLog.map((e, i) => (
-                  <li key={i} className={`border-l-4 pl-3 ${e.result === "ALLOW" ? "border-emerald-400" : "border-rose-400"}`}>
-                    <span className={`mr-2 rounded-full px-2 py-0.5 font-semibold ${e.result === "ALLOW" ? "bg-emerald-400/20 text-emerald-300" : "bg-rose-400/20 text-rose-300"}`}>{e.result}</span>
-                    <span className="text-gray-500">{e.t}</span> <span className="font-semibold text-gray-800">{e.persona}</span>{" "}
-                    <span className="font-mono text-gray-700">{e.action}</span>
-                    <div className="text-gray-600">{e.reason}</div>
-                    {e.rule && <div className="italic text-gray-500">rule: {e.rule}</div>}
+                  <li key={i} className="py-2">
+                    <span className={chip + " mr-2 " + (e.result === "ALLOW" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400")}>{e.result}</span>
+                    <span className="font-mono text-neutral-500">{e.t}</span> <span className="font-medium text-neutral-200">{e.persona}</span>{" "}
+                    <span className="font-mono text-neutral-400">{e.action}</span>
+                    <div className="mt-1 text-neutral-400">{e.reason}</div>
+                    {e.rule && <div className="italic text-neutral-500">rule: {e.rule}</div>}
                   </li>
                 ))}
               </ul>
             ) : (
-            <ul className="mt-3 space-y-3 text-sm">
+            <ul className="mt-3 divide-y divide-[#1f1f1f] text-sm">
               {ATTEMPTS.map((a) => (
-                <li key={a.who} className="border-l-4 border-red-300 pl-3">
-                  <span className="text-gray-800">{a.who}</span>
-                  <span className="font-semibold text-red-700"> {"->"} {a.result}</span>
+                <li key={a.who} className="py-2.5">
+                  <span className="text-neutral-300">{a.who}</span>
+                  <span className="font-medium text-rose-400"> {"->"} {a.result}</span>
                   <Vi className="text-xs">{a.vi}</Vi>
                 </li>
               ))}
             </ul>
             )}
-          </TiltCard>
+          </div>
 
           {/* Why this can't be rigged */}
-          <TiltCard className="p-6">
-            <h2 className="text-xl font-bold text-gray-900">Why this can't be rigged</h2>
+          <div className={card}>
+            <h2 className="text-base font-semibold tracking-tight text-neutral-100">Why this can't be rigged</h2>
             <Vi>Vì sao không thể thông thầu</Vi>
-            <ul className="mt-3 space-y-3 text-sm text-gray-800">
-              <li className="flex gap-2"><FaKey className="mt-1 shrink-0 text-blue-700" /><span><strong>Keys no one holds.</strong> The decryption key never exists in one place, so there is nothing for an insider to steal.</span></li>
-              <li className="flex gap-2"><FaUsers className="mt-1 shrink-0 text-blue-700" /><span><strong>Rules change only by quorum.</strong> Opening envelopes or closing submissions needs 3 of 5 committee signatures.</span></li>
-              <li className="flex gap-2"><FaMicrochip className="mt-1 shrink-0 text-blue-700" /><span><strong>Decryption only at the edge.</strong> A price decrypts in the browser of the role holder, never on the server.</span></li>
+            <ul className="mt-3 space-y-3 text-sm text-neutral-400">
+              <li className="flex gap-2"><FaKey className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Keys no one holds.</strong> The decryption key never exists in one place, so there is nothing for an insider to steal.</span></li>
+              <li className="flex gap-2"><FaUsers className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Rules change only by quorum.</strong> Opening envelopes or closing submissions needs 3 of 5 committee signatures.</span></li>
+              <li className="flex gap-2"><FaMicrochip className="mt-1 shrink-0 text-neutral-500" /><span><strong className="font-medium text-neutral-200">Decryption only at the edge.</strong> A price decrypts in the browser of the role holder, never on the server.</span></li>
             </ul>
-            <p className="mt-4 text-sm font-medium text-gray-900">
+            <p className="mt-4 border-t border-[#1f1f1f] pt-4 text-sm text-neutral-300">
               With ordinary login and backend permissions, whoever runs the database is the person you have to trust - that is exactly how bid rigging happens.
             </p>
-          </TiltCard>
+          </div>
         </div>
 
         {pv && pv.persona === "ai" && (
-          <section className="glass p-6">
+          <section className={card}>
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold tracking-tight text-slate-100">AI evaluator</h2>
-              <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">simulated AI</span>
+              <h2 className="text-base font-semibold tracking-tight text-neutral-100">AI evaluator</h2>
+              <span className={chip + " bg-amber-500/10 text-amber-400"}>simulated AI</span>
             </div>
             <Vi>Tác tử AI chấm thầu (mô phỏng)</Vi>
             <button type="button" onClick={requestPrices} className="btn-gold mt-3">Request bid prices</button>
             {aiResult && !aiResult.allow && (
-              <p className="mt-3 rounded-xl border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+              <p className="mt-3 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
                 DENY: {aiResult.reason}. <span className="italic">rule: {aiResult.rule}</span>
               </p>
             )}
             {aiResult && aiResult.allow && (
-              <div className="mt-3 rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">
-                <p className="font-semibold">ALLOW: {aiResult.reason}</p>
-                <p className="mt-1">{aiResult.summary}</p>
-                <p className="mt-1 text-xs italic text-emerald-300">Generated locally by the simulated AI from the opened prices. No model was called.</p>
+              <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+                <p className="font-medium">ALLOW: {aiResult.reason}</p>
+                <p className="mt-1 text-neutral-300">{aiResult.summary}</p>
+                <p className="mt-1 text-xs italic text-neutral-500">Generated locally by the simulated AI from the opened prices. No model was called.</p>
               </div>
             )}
           </section>
@@ -421,7 +408,7 @@ export default function TenderBoard() {
           </Link>
         </div>
 
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-neutral-500">
           Prototype: Vendor A's envelopes are real TideCloak-encrypted data; competitor bids and committee members 2-5 are simulated.
         </p>
       </div>
