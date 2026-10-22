@@ -11,6 +11,11 @@ const routesRoles = [
 ];
 
 export async function middleware(req) {
+  // Preview mode: no TideCloak, so skip server-side auth entirely.
+  if (process.env.NEXT_PUBLIC_PREVIEW_MODE === "1") {
+    return NextResponse.next();
+  }
+
   const { pathname } = req.nextUrl;
   
   var requiredRole = null;

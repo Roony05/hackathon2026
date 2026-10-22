@@ -3,10 +3,20 @@
 import { createContext, useContext, useCallback, useState, useEffect } from "react";
 import { TideCloakProvider, useTideCloak } from "@tidecloak/nextjs";
 import appService from "../../lib/appService";
+import { PreviewAuthProvider } from "../preview/previewAuth";
+
+// Preview mode (simulated auth/crypto/approvals) is OFF unless explicitly enabled.
+const PREVIEW = process.env.NEXT_PUBLIC_PREVIEW_MODE === "1";
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+function PreviewProviderWrapper({ children }) {
+  return <PreviewAuthProvider Context={AuthContext}>{children}</PreviewAuthProvider>;
+}
+
+export const AuthProvider = PREVIEW ? PreviewProviderWrapper : RealAuthProvider;
+
+function RealAuthProvider({ children }) {
   const [config, setConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(true);
 

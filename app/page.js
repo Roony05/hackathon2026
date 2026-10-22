@@ -14,6 +14,9 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from './context/AuthProvider';
 import appService from '../lib/appService';
+import { PreviewLanding } from './preview/previewAuth';
+
+const PREVIEW = process.env.NEXT_PUBLIC_PREVIEW_MODE === '1';
 
 /**
  * Hook: load TideCloak config and track initialization state.
@@ -141,7 +144,11 @@ function useTideLink(baseURL, setOverlayLoading) {
   return { isLinked, inviteLink, showLinkedMsg, checkingLink };
 }
 
-export default function Login() {
+export default function Page() {
+  return PREVIEW ? <PreviewLanding /> : <Login />;
+}
+
+function Login() {
 
   const [overlayLoading, setOverlayLoading] = useState(true);
 
